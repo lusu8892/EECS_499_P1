@@ -1,0 +1,1 @@
+/home/sxl924/Desktop/find_black_beads/CMakeFiles/BlkBdsSegmentation.dir

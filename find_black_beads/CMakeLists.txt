@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+project( FindBlackBeads )
+find_package( OpenCV REQUIRED )
+add_executable( BlkBdsSegmentation BlkBdsSegmentation.cpp )
+target_link_libraries( BlkBdsSegmentation ${OpenCV_LIBS} )

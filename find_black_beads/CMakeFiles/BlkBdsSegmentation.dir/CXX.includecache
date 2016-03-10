@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/sxl924/Desktop/find_black_beads/BlkBdsSegmentation.cpp
+stdio.h
+-
+opencv2/opencv.hpp
+-
+
