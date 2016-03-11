@@ -34,11 +34,14 @@ RM = /usr/bin/cmake -E remove -f
 # Escaping for special characters.
 EQUALS = =
 
+# The program to use to edit the cache.
+CMAKE_EDIT_COMMAND = /usr/bin/ccmake
+
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/sxl924/Desktop/EECS_499_P1/find_black_beads
+CMAKE_SOURCE_DIR = /home/sulu/Desktop/EECS_499_P1/find_black_beads
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/sxl924/Desktop/EECS_499_P1/find_black_beads
+CMAKE_BINARY_DIR = /home/sulu/Desktop/EECS_499_P1/find_black_beads
 
 # Include any dependencies generated for this target.
 include CMakeFiles/BlkBdsSegmentation.dir/depend.make
@@ -51,17 +54,17 @@ include CMakeFiles/BlkBdsSegmentation.dir/flags.make
 
 CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o: CMakeFiles/BlkBdsSegmentation.dir/flags.make
 CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o: BlkBdsSegmentation.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/sxl924/Desktop/EECS_499_P1/find_black_beads/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/sulu/Desktop/EECS_499_P1/find_black_beads/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o -c /home/sxl924/Desktop/EECS_499_P1/find_black_beads/BlkBdsSegmentation.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o -c /home/sulu/Desktop/EECS_499_P1/find_black_beads/BlkBdsSegmentation.cpp
 
 CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/sxl924/Desktop/EECS_499_P1/find_black_beads/BlkBdsSegmentation.cpp > CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/sulu/Desktop/EECS_499_P1/find_black_beads/BlkBdsSegmentation.cpp > CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.i
 
 CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/sxl924/Desktop/EECS_499_P1/find_black_beads/BlkBdsSegmentation.cpp -o CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/sulu/Desktop/EECS_499_P1/find_black_beads/BlkBdsSegmentation.cpp -o CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.s
 
 CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o.requires:
 .PHONY : CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o.requires
@@ -81,35 +84,32 @@ BlkBdsSegmentation_EXTERNAL_OBJECTS =
 
 BlkBdsSegmentation: CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o
 BlkBdsSegmentation: CMakeFiles/BlkBdsSegmentation.dir/build.make
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_videostab.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_video.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_ts.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_superres.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_stitching.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_photo.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_ocl.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_objdetect.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_ml.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_legacy.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_highgui.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_gpu.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_flann.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_features2d.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_core.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_contrib.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_calib3d.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_photo.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_legacy.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_video.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_objdetect.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_ml.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_calib3d.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_features2d.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_highgui.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_flann.so.2.4.8
-BlkBdsSegmentation: /usr/lib/x86_64-linux-gnu/libopencv_core.so.2.4.8
+BlkBdsSegmentation: /usr/local/lib/libopencv_viz.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_videostab.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_videoio.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_video.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_superres.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_stitching.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_shape.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_photo.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_objdetect.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_ml.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_imgproc.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_imgcodecs.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_highgui.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_flann.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_features2d.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_core.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_calib3d.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_features2d.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_ml.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_highgui.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_videoio.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_imgcodecs.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_flann.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_video.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_imgproc.so.3.1.0
+BlkBdsSegmentation: /usr/local/lib/libopencv_core.so.3.1.0
 BlkBdsSegmentation: CMakeFiles/BlkBdsSegmentation.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --red --bold "Linking CXX executable BlkBdsSegmentation"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/BlkBdsSegmentation.dir/link.txt --verbose=$(VERBOSE)
@@ -126,6 +126,6 @@ CMakeFiles/BlkBdsSegmentation.dir/clean:
 .PHONY : CMakeFiles/BlkBdsSegmentation.dir/clean
 
 CMakeFiles/BlkBdsSegmentation.dir/depend:
-	cd /home/sxl924/Desktop/EECS_499_P1/find_black_beads && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/sxl924/Desktop/EECS_499_P1/find_black_beads /home/sxl924/Desktop/EECS_499_P1/find_black_beads /home/sxl924/Desktop/EECS_499_P1/find_black_beads /home/sxl924/Desktop/EECS_499_P1/find_black_beads /home/sxl924/Desktop/EECS_499_P1/find_black_beads/CMakeFiles/BlkBdsSegmentation.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/sulu/Desktop/EECS_499_P1/find_black_beads && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/sulu/Desktop/EECS_499_P1/find_black_beads /home/sulu/Desktop/EECS_499_P1/find_black_beads /home/sulu/Desktop/EECS_499_P1/find_black_beads /home/sulu/Desktop/EECS_499_P1/find_black_beads /home/sulu/Desktop/EECS_499_P1/find_black_beads/CMakeFiles/BlkBdsSegmentation.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/BlkBdsSegmentation.dir/depend
 

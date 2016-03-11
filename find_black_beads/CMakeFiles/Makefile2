@@ -46,11 +46,14 @@ RM = /usr/bin/cmake -E remove -f
 # Escaping for special characters.
 EQUALS = =
 
+# The program to use to edit the cache.
+CMAKE_EDIT_COMMAND = /usr/bin/ccmake
+
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/sxl924/Desktop/EECS_499_P1/find_black_beads
+CMAKE_SOURCE_DIR = /home/sulu/Desktop/EECS_499_P1/find_black_beads
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/sxl924/Desktop/EECS_499_P1/find_black_beads
+CMAKE_BINARY_DIR = /home/sulu/Desktop/EECS_499_P1/find_black_beads
 
 #=============================================================================
 # Target rules for target CMakeFiles/BlkBdsSegmentation.dir
@@ -59,7 +62,7 @@ CMAKE_BINARY_DIR = /home/sxl924/Desktop/EECS_499_P1/find_black_beads
 CMakeFiles/BlkBdsSegmentation.dir/all:
 	$(MAKE) -f CMakeFiles/BlkBdsSegmentation.dir/build.make CMakeFiles/BlkBdsSegmentation.dir/depend
 	$(MAKE) -f CMakeFiles/BlkBdsSegmentation.dir/build.make CMakeFiles/BlkBdsSegmentation.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/sxl924/Desktop/EECS_499_P1/find_black_beads/CMakeFiles  1
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/sulu/Desktop/EECS_499_P1/find_black_beads/CMakeFiles  1
 	@echo "Built target BlkBdsSegmentation"
 .PHONY : CMakeFiles/BlkBdsSegmentation.dir/all
 
@@ -69,9 +72,9 @@ all: CMakeFiles/BlkBdsSegmentation.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/BlkBdsSegmentation.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sxl924/Desktop/EECS_499_P1/find_black_beads/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/sulu/Desktop/EECS_499_P1/find_black_beads/CMakeFiles 1
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/BlkBdsSegmentation.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sxl924/Desktop/EECS_499_P1/find_black_beads/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/sulu/Desktop/EECS_499_P1/find_black_beads/CMakeFiles 0
 .PHONY : CMakeFiles/BlkBdsSegmentation.dir/rule
 
 # Convenience name for target.
