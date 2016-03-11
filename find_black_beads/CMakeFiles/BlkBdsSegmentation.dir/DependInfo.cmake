@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/sxl924/Desktop/find_black_beads/BlkBdsSegmentation.cpp" "/home/sxl924/Desktop/find_black_beads/CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o"
+  "/home/sxl924/Desktop/EECS_499_P1/find_black_beads/BlkBdsSegmentation.cpp" "/home/sxl924/Desktop/EECS_499_P1/find_black_beads/CMakeFiles/BlkBdsSegmentation.dir/BlkBdsSegmentation.cpp.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

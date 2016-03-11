@@ -6,9 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/home/sxl924/Desktop/find_black_beads/BlkBdsSegmentation.cpp
+/home/sxl924/Desktop/EECS_499_P1/find_black_beads/BlkBdsSegmentation.cpp
 stdio.h
 -
 opencv2/opencv.hpp
+-
+stdlib.h
 -
 
