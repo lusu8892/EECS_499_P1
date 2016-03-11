@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
+#include <stdlib.h>
+
 
 using namespace cv;
-
+using namespace std;
 int main(int argc, char** argv )
 {
     
@@ -12,13 +14,36 @@ int main(int argc, char** argv )
     } 
     
     namedWindow("Black Beads", WINDOW_AUTOSIZE );
-    for(;;)
+    string file_name;
+    char buffer [50];
+
+
+    for(int i=0 ;; i++)
     {
         Mat frame;
+
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+
         cap >> frame; // get a new frame from camera
         cvtColor(frame, frame, CV_BGR2GRAY); // convert color image to gray image
         threshold(frame, frame, 150, 255, THRESH_BINARY); // segmentation
-        imshow("Black Beads", frame);
+        
+        morphologyEx(frame, frame, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, {1,1}));  
+
+        findContours(frame, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+
+        Mat drawing = Mat::zeros( frame.size(), CV_8UC3 );
+        for( int i = 0; i< contours.size(); i++ )
+        {
+            Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+            drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+        }
+        fitEllipse(contours);
+
+        file_name = sprintf(buffer, "%d.png",i);
+        imwrite(file_name, contours, CV_IMWRITE_PNG_COMPRESSION)
+        imshow("Black Beads", drawing);
         if(waitKey(30) >= 0) break;
     }
     
