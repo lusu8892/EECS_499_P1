@@ -55,11 +55,13 @@ int main(int argc, char** argv )
         // if(waitKey(30) >= 0) break;
         
         findContours(morph_frame, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+
+        // search and store contours which its area is btw certain value
         for (int j=0; j<contours.size();++j)
         { 
             double area;
             area = contourArea(contours[j]);
-            if (area > 500 && area < 800)
+            if (area > 450 && area < 800)
             {
                 modifed_contours.push_back(contours[j]);
                 printf("Area: %f \n",area);
@@ -69,18 +71,19 @@ int main(int argc, char** argv )
 
         cout << modifed_contours.size() << endl;
 
-        /// Get the moments
+        // Get the moments
         vector<Moments> mu(modifed_contours.size() );
-        for( int i = 0; i < modifed_contours.size(); i++ )
+        for ( int k = 0; k < modifed_contours.size(); k++ )
         {
-            mu[i] = moments( modifed_contours[i], false );
+            mu[k] = moments( modifed_contours[k], false );
         }
 
-        /// Get the mass centers:
+        // Get the mass centers:
         vector<Point2f> mc( modifed_contours.size() );
-        for( int i = 0; i < modifed_contours.size(); i++ )
+        for ( int k = 0; k < modifed_contours.size(); k++ )
         {
-            mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
+            mc[k] = Point2f( mu[k].m10/mu[k].m00 , mu[k].m01/mu[k].m00 );
+            printf("centroid position: x = %f, y = %f \n", mc[k].x, mc[k].y);
         } 
 
         Mat drawing = Mat::zeros( morph_frame.size(), CV_8UC3 );
@@ -94,6 +97,7 @@ int main(int argc, char** argv )
         
         imshow("Black Beads", drawing);
         if(waitKey(30) >= 0) break;
+
        	// printf("here");
        	// fitEllipse(contours);
        	// printf("finish fitting");
