@@ -68,6 +68,21 @@ int main(int argc, char** argv )
         }
 
         cout << modifed_contours.size() << endl;
+
+        /// Get the moments
+        vector<Moments> mu(modifed_contours.size() );
+        for( int i = 0; i < modifed_contours.size(); i++ )
+        {
+            mu[i] = moments( modifed_contours[i], false );
+        }
+
+        /// Get the mass centers:
+        vector<Point2f> mc( modifed_contours.size() );
+        for( int i = 0; i < modifed_contours.size(); i++ )
+        {
+            mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
+        } 
+
         Mat drawing = Mat::zeros( morph_frame.size(), CV_8UC3 );
 
        	for( int k = 0; k< modifed_contours.size(); k++ )
