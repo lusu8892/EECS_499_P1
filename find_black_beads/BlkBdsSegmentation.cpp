@@ -48,8 +48,10 @@ int main(int argc, char** argv )
         cvtColor(frame, cvt_frame, CV_BGR2GRAY); // convert color image to gray image
         // imshow("Black Beads", frame);
         //if(waitKey(30) >= 0) break;
-        threshold(cvt_frame, threshold_frame, 150, 255, THRESH_BINARY_INV+THRESH_OTSU); // segmentation
-        
+        threshold(cvt_frame, threshold_frame, 50, 255, THRESH_BINARY_INV); // segmentation
+        imshow("Black Beads", threshold_frame);
+        if(waitKey(30) >= 0) break;
+
         morphologyEx(threshold_frame, morph_frame, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE,Size(3,3)));
         // imshow("Black Beads", morph_frame);
         // if(waitKey(30) >= 0) break;
@@ -61,7 +63,7 @@ int main(int argc, char** argv )
         { 
             double area;
             area = contourArea(contours[j]);
-            if (area > 450 && area < 800)
+            if (area > 350 && area < 800)
             {
                 modifed_contours.push_back(contours[j]);
                 printf("Area: %f \n",area);
