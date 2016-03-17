@@ -17,8 +17,30 @@ int main(int argc, char** argv )
       printf("Camera Open \n");
     } 
 
-    
-    namedWindow("Black Beads", WINDOW_AUTOSIZE );
+    VideoWriter writer; // instantiate a video recorder object
+
+    // filename string
+    string video_filename = "BlackBeadsRandoMotion.avi";
+    // fourcc integer
+    int fcc = CV_FOURCC('D','I','V','3');
+    // frames per sec integer
+    int fps = 10;
+    // frame size 
+    cv::Size frame_size(cap.get(CV_CAP_PROP_FRAME_WIDTH),cap.get(CV_CAP_PROP_FRAME_HEIGHT))
+
+    writer = VideoWriter(video_filename, fcc, fps, frame_size); // initializing an object of ViderWriter
+
+    if(!writer.isOpened())
+    {
+        cout << "ERROR OPENING FILE FOR WRITE" << endl
+        getchar();
+
+        return -1;
+    }
+
+
+
+    namedWindow("Black Beads Random Motion", WINDOW_AUTOSIZE );
     string file_name;
     char buffer [50];
 
@@ -97,9 +119,10 @@ int main(int argc, char** argv )
            	drawContours( drawing, modifed_contours, k, color, 2, 8, hierarchy, 0, Point() );
        	}
         
-        imshow("Black Beads", drawing);
+                
+        imshow("Black Beads Motion", drawing);
         if(waitKey(30) >= 0) break;
-
+        writer.writer(drawing);
        	// printf("here");
        	// fitEllipse(contours);
        	// printf("finish fitting");
