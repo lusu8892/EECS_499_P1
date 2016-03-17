@@ -49,8 +49,8 @@ int main(int argc, char** argv )
         // imshow("Black Beads", frame);
         //if(waitKey(30) >= 0) break;
         threshold(cvt_frame, threshold_frame, 50, 255, THRESH_BINARY_INV); // segmentation
-        imshow("Black Beads", threshold_frame);
-        if(waitKey(30) >= 0) break;
+        // imshow("Black Beads", threshold_frame);
+        // if(waitKey(30) >= 0) break;
 
         morphologyEx(threshold_frame, morph_frame, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE,Size(3,3)));
         // imshow("Black Beads", morph_frame);
@@ -92,7 +92,7 @@ int main(int argc, char** argv )
 
        	for( int k = 0; k< modifed_contours.size(); k++ )
        	{
-            Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+            Scalar color = Scalar( 255, 255, 255 );
             
            	drawContours( drawing, modifed_contours, k, color, 2, 8, hierarchy, 0, Point() );
        	}
