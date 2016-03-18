@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(find_black_beads)
-
+find_package(OpenCV REQUIRED)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
-  opencv2
   roscpp
   std_msgs
-  uvc_camera
+  cwru_opencv_common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -115,8 +114,8 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -131,14 +130,18 @@ include_directories(
 # add_dependencies(find_black_beads ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(find_black_beads src/find_black_beads.cpp)
+#add_executable(find_black_beads src/find_black_beads.cpp)
+add_executable(segment_black_beads src/segment_black_beads.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(find_black_beads_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(find_black_beads ${catkin_LIBRARIES} ${OpenCV2_LIBS}) 
+target_link_libraries(segment_black_beads
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+) 
 
 #############
 ## Install ##
