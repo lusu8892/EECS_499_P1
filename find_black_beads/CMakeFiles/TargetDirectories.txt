@@ -1,1 +1,0 @@
-/home/sulu/Desktop/EECS_499_P1/find_black_beads/CMakeFiles/BlkBdsSegmentation.dir
