@@ -8,27 +8,33 @@
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <cwru_opencv_common/projective_geometry.h>
 
 using namespace cv;
 using namespace std;
+using namespace cv_projective;
 
 //Store all constants for image encodings in the enc namespace to be used later.
 namespace enc = sensor_msgs::image_encodings;
  
 //Declare a string with the name of the window that we will create using OpenCV where processed images will be displayed.
 static const char WINDOW[] = "Image Processed";
- 
+
+Mat fameIn;
+bool newImage;
 
 //This function is called everytime a new image is published
 void imageCallback(const sensor_msgs::ImageConstPtr& original_image)
 {
     //Convert from the ROS image message to a CvImage suitable for working with OpenCV for processing
-    cv_bridge::CvImagePtr cv_ptr;
+    cv_bridge::CvImageConstPtr cv_ptr;
     try
     {
         //Always copy, returning a mutable CvImage
         //OpenCV expects color images to use BGR channel order.
-        cv_ptr = cv_bridge::toCvCopy(original_image, enc::BGR8);
+        cv_ptr = cv_bridge::toCvShare(original_image, enc::BGR8);
+        frameIn = cv_ptr->image.clone();
+        newImage = true;
     }
     catch (cv_bridge::Exception& e)
     {
@@ -87,7 +93,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& original_image)
      
     //Display the image using OpenCV
     cv::imshow(WINDOW, drawing);
-    if(waitKey(30) >= 0) break;
+    waitKey(30);
     //Add some delay in miliseconds. The function only works if there is at least one HighGUI window created and the window is active. If there are several HighGUI windows, any of them can be active.
     // cv::waitKey(3);
     /**
@@ -116,13 +122,14 @@ int main(int argc, char** argv )
 
     while(ros::ok())
     {
+        ros::spinOnce();
         cameraProjectionMatrices.projectionSubscriptionCb(cv_ptr->toImageMsg(),0); // left camera
         cameraProjectionMatrices.projectionSubscriptionCb(cv_ptr->toImageMsg(),1); // right camera
 
         left_camera_image = cameraProjectionMatrices.getLeftProjectionMatrix(); // get left camera image
         right_camera_image = cameraProjectionMatrices.getRightProjectionMatrix(); // get right camera image
 
-        deprojection_output = cameraProjectionMatrices.deprojectStereoPoint(,left_camera_image,right_camera_image);
+        deprojection_output = cameraProjectionMatrices.deprojectStereoPoint(left_camera_image,right_camera_image,P_l,P_r);
 
 
     }
