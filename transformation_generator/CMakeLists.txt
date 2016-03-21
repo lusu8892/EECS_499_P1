@@ -1,17 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(find_black_beads)
-find_package(OpenCV REQUIRED)
+project(transformation_generator)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
-  image_transport
+  cmake_modules
   roscpp
   std_msgs
-  cwru_opencv_common
-  message_generation
-  cmake_modules
 )
 
 ## System dependencies are found with CMake's conventions
@@ -48,9 +44,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-	ListOfPoints.msg
-)
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -67,10 +65,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -103,9 +101,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES find_black_beads
-#  CATKIN_DEPENDS cv_bridge image_transport opencv2 roscpp std_msgs uvc_camera cmake_modules
-CATKIN_DEPENDS message_runtime
+#  LIBRARIES transformation_generator
+#  CATKIN_DEPENDS cmake_modules roscpp std_msgs
 #  DEPENDS system_lib
 )
 
@@ -115,34 +112,32 @@ CATKIN_DEPENDS message_runtime
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
+# include_directories(include)
 include_directories(
-  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(find_black_beads
-#   src/${PROJECT_NAME}/find_black_beads.cpp
+# add_library(transformation_generator
+#   src/${PROJECT_NAME}/transformation_generator.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(find_black_beads ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(transformation_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-#add_executable(find_black_beads src/find_black_beads.cpp)
-add_executable(segment_black_beads src/segment_black_beads.cpp)
+# add_executable(transformation_generator_node src/transformation_generator_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(find_black_beads_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(transformation_generator_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(segment_black_beads
-    ${catkin_LIBRARIES}
-    ${OpenCV_LIBRARIES}
-) 
+# target_link_libraries(transformation_generator_node
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -159,7 +154,7 @@ target_link_libraries(segment_black_beads
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS find_black_beads find_black_beads_node
+# install(TARGETS transformation_generator transformation_generator_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -184,7 +179,7 @@ target_link_libraries(segment_black_beads
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_find_black_beads.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_transformation_generator.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
