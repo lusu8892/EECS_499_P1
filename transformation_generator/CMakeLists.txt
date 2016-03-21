@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   roscpp
   std_msgs
+  geometry_msgs
   message_generation
 )
 
@@ -46,6 +47,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 add_message_files(
+	FILES
 	ListOfPoints.msg
 )
 
@@ -67,6 +69,7 @@ add_message_files(
 generate_messages(
    DEPENDENCIES
    std_msgs
+   geometry_msgs
 )
 
 ################################################
