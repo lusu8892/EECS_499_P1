@@ -6,18 +6,25 @@
 const double BEADS_SEPERATION_VALUE = 0.0254;
 
 // Constructor
-TransformationGenerator::TransformationGenerator(ros::NodeHandle& nodehandle) : nh_(*nodehandle)
+// TransformationGenerator::TransformationGenerator(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
+// {
+// 	// initializePublishers();
+// }
+
+TransformationGenerator::TransformationGenerator()
 {
-	initializePublishers();
+	// initializePublishers();
 }
 // given randomly generated transformation matrix, this function can give a list of
 // beads position
-void TransformationGenerator::getBeadsPosition(int beads_number, int row_mun, int col_num, transformation_generator::ListOfPoints& list_of_beads_pos)
+void TransformationGenerator::getBeadsPosition(int beads_number, int row_num, int col_num, transformation_generator::ListOfPoints& list_of_beads_pos)
 {
-	list_of_beads_pos.clear(); // clear vector;
+	list_of_beads_pos.points.clear(); // clear vector;
 	geometry_msgs::Point bead_position;
 
 	Eigen::Vector3d Ob;
+	Eigen::Affine3d random_trans_mat;
+	random_trans_mat = randomTransformationMatrixGenerator();
 	Eigen::Vector3d Oe = random_trans_mat.translation();
 	Eigen::Vector3d beads_in_sensor_frame;
 
@@ -32,18 +39,19 @@ void TransformationGenerator::getBeadsPosition(int beads_number, int row_mun, in
 			bead_position.x = beads_in_sensor_frame(0);
 			bead_position.y = beads_in_sensor_frame(1);
 			bead_position.z = beads_in_sensor_frame(2);
-			list_of_beads_pos.push_back(beads);
+			list_of_beads_pos.points.push_back(bead_position);
 		}
 	}
+	// beads_pos_pub_.publish(list_of_beads_pos);
 }
 
-void TransformationGenerator::initializePublishers()
-{
-	ROS_INFO("Initializing Publishers");
-	beads_pos_pub_ = nh_.advertise<transformation_generator::ListOfPoints>("beads_random_position", 1, true);
-	//add more publishers, as needed
-	// note: COULD make minimal_publisher_ a public member function, if want to use it within "main()"
-}
+// void TransformationGenerator::initializePublishers()
+// {
+// 	ROS_INFO("Initializing Publishers");
+// 	beads_pos_pub_ = nh_.advertise<transformation_generator::ListOfPoints>("beads_random_position", 1, true);
+// 	//add more publishers, as needed
+// 	// note: COULD make minimal_publisher_ a public member function, if want to use it within "main()"
+// }
 
 // A function randomly generate transformation matrix
 Eigen::Affine3d TransformationGenerator::randomTransformationMatrixGenerator()

@@ -18,7 +18,6 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <Eigen/Eigenvalues>
-#include <eigen_msg.h>
 #include <geometry_msgs/Point.h>
 #include <transformation_generator/ListOfPoints.h>
 
@@ -30,26 +29,26 @@ using namespace std;
 class TransformationGenerator
 {
 public:
-	TransformationGenerator(ros::NodeHandle& nodehandle);
-
+	TransformationGenerator();
+	// TransformationGenerator(ros::NodeHandle* nodehandle);
 	// given randomly generated transformation matrix, this function can give a list of
 	// beads position
 	void getBeadsPosition(int beads_number, int row_num, int col_num, transformation_generator::ListOfPoints& list_of_points);
 	
-	// convert a vector of Eigen::Vector3d points into ros geometry/Points message
+	// // A function randomly generate transformation matrix
+	// Eigen::Affine3d randomTransformationMatrixGenerator();
 
 private:
 	// put private member data here; "private" data will only be available to member functions of this class;
-	ros::NodeHandle nh_; // we will need this, to pass between "main" and constructor
+	// ros::NodeHandle nh_; // we will need this, to pass between "main" and constructor
 	// some objects to support subscriber, service, and publisher
-	ros::Publisher beads_pos_pub_;
-	// transformation_generator::ListOfPoints list_of_points_;
+	// ros::Publisher beads_pos_pub_;
 
 	// member methods as well:
-	void initializePublishers();
+	// void initializePublishers();
 
 	// A function randomly generate transformation matrix
-	// Eigen::Affine3d randomTransformationMatrixGenerator();
+	Eigen::Affine3d randomTransformationMatrixGenerator();
 
 };
 

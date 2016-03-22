@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(transformation_generator)
+project(beads_generator)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -8,16 +8,17 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   roscpp
   std_msgs
-  geometry_msgs
-  message_generation
+  transformation_generator
 )
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
 find_package(cmake_modules REQUIRED)
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 add_definitions(${EIGEN_DEFINITIONS})
+
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -49,10 +50,11 @@ add_definitions(${EIGEN_DEFINITIONS})
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-	FILES
-	ListOfPoints.msg
-)
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -69,11 +71,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-   geometry_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs  # Or other packages containing msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -105,11 +106,10 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES transformation_generator
-  CATKIN_DEPENDS cmake_modules roscpp std_msgs
-  CATKIN_DEPENDS message_runtime
-  DEPENDS system_lib
+#  INCLUDE_DIRS include
+#  LIBRARIES beads_generator
+#  CATKIN_DEPENDS cmake_modules roscpp transformation_generator
+#  DEPENDS system_lib
 )
 
 ###########
@@ -119,27 +119,29 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(
+  include ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a C++ library
-add_library(transformation_generator src/transformation_generator.cpp)
+# add_library(beads_generator
+#   src/${PROJECT_NAME}/beads_generator.cpp
+# )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(transformation_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(beads_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(transformation_generator_node src/transformation_generator_node.cpp)
+add_executable(beads_generator src/beads_generator.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(transformation_generator_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(beads_generator_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(transformation_generator_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(beads_generator transformation_generator ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -156,7 +158,7 @@ add_library(transformation_generator src/transformation_generator.cpp)
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS transformation_generator transformation_generator_node
+# install(TARGETS beads_generator beads_generator_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -181,7 +183,7 @@ add_library(transformation_generator src/transformation_generator.cpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_transformation_generator.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_beads_generator.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
