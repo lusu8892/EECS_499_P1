@@ -50,6 +50,9 @@ private:
 	// A function randomly generate transformation matrix
 	Eigen::Affine3d randomTransformationMatrixGenerator();
 
+	// A function generate random number
+	double gaussianNumberGenerator(double LO, double HI);
+
 };
 
 #endif

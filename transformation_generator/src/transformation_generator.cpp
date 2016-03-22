@@ -53,22 +53,36 @@ void TransformationGenerator::getBeadsPosition(int beads_number, int row_num, in
 // 	// note: COULD make minimal_publisher_ a public member function, if want to use it within "main()"
 // }
 
+// A function generate random number
+double TransformationGenerator::gaussianNumberGenerator(double LO, double HI)
+{
+	double gaussian_num;
+	int iteration = 5;
+	// double LO = -0.01;
+	// double HI = 0.01;
+
+	for (int i = 0; i < iteration; ++i)
+	{
+		gaussian_num += LO + static_cast <double> (rand()) /( static_cast <double> (RAND_MAX/(HI-LO))); 
+	}
+	return gaussian_num;
+}
 // A function randomly generate transformation matrix
 Eigen::Affine3d TransformationGenerator::randomTransformationMatrixGenerator()
 {
 	Eigen::Affine3d random_trans_mat;
 	Eigen::Vector3d Oe;
-	Oe(0)= rand() % 10 + 1;
-	Oe(1)= rand() % 10 + 1;
-	Oe(2)= rand() % 10 + 1;
+	Oe(0)= gaussianNumberGenerator(-0.01, 0.01);
+	Oe(1)= gaussianNumberGenerator(-0.01, 0.01);
+	Oe(2)= gaussianNumberGenerator(-0.01, 0.01);
 	random_trans_mat.translation() = Oe; // the "translation" part of affine is the vector between origins
 	Eigen::Quaterniond q;
 	// Eigen::Quaterniond<Scalar> 
 	// double magnitude;
-	q.x() = rand();
-	q.y() = rand();
-	q.z() = rand();
-	q.w() = rand();
+	q.x() = gaussianNumberGenerator(-1, 1);
+	q.y() = gaussianNumberGenerator(-1, 1);
+	q.z() = gaussianNumberGenerator(-1, 1);
+	q.w() = gaussianNumberGenerator(-1, 1);
 	// magnitude = sart(q.x()^2 + q.y()^2 + q.z()^2 + q.w()^2);
 	// // normalized q.x, q.y, q.z, q.w
 	// q.x() = q.x() / magnitude;

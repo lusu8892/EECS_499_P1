@@ -7,8 +7,8 @@
 int main(int argc, char** argv) {
 	ros::init(argc, argv, "beads_generator"); //node name
 	ros::NodeHandle nh; // don't really need this in this example
-	ros::Publisher beads_pos_pub = nh.advertise<transformation_generator::ListOfPoints>("beads_random_position", 1, true);
-	TransformationGenerator beadsGenerator();
+	ros::Publisher beads_pos_pub = nh.advertise<transformation_generator::ListOfPoints>("beads_random_position", 1);
+	TransformationGenerator beadsGenerator;
 	transformation_generator::ListOfPoints list_of_points;
 
 	while(ros::ok())
