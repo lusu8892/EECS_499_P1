@@ -15,29 +15,27 @@
 #include <transformation_generator/ListOfPoints.h>
 
 
-using namespace std;
-
 class ParticleWeight
 {
 public:
-	ParticleWeight(ros::NodeHandle* nodehandle);
-	void drawBeads();
+    ParticleWeight(ros::NodeHandle* nodehandle);
+    void drawBeads();
 
 
 
 private:
-	// put private member data here; "private" data will only be available to member functions of this class;
-	ros::NodeHandle nh_; // we will need this, to pass between "main" and constructor
-	// some objects to support subscriber, service, and publisher
-	ros::Publisher particle_weight_pub_;
-	ros::Subscriber img_sub_
+    // put private member data here; "private" data will only be available to member functions of this class;
+    ros::NodeHandle nh_; // we will need this, to pass between "main" and constructor
+    // some objects to support subscriber, service, and publisher
+    ros::Publisher particle_weight_pub_;
+    ros::Subscriber img_sub_
 
 
-	// member methods as well:
-	void initializePublishers();
-	void initializeSubscribers();
+    // member methods as well:
+    void initializePublishers();
+    void initializeSubscribers();
 
-	void imageCallback(const sensor_msgs::ImageConstPtr& segmented_image);
+    void imageCallback(const sensor_msgs::ImageConstPtr& segmented_image);
 };
 
 #endif
