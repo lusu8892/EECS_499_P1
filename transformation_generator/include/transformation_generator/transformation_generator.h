@@ -31,13 +31,12 @@ namespace velo_vec
         Eigen::Vector3d angV; // angular velocity part
         // constructor
         velocityVector(Eigen::Vector3d transV_ = Eigen::Vector3d(1, 2, 3), Eigen::Vector3d angV_ = Eigen::Vector3d(1, 2, 3)):
-        transV(transV_)
+        transV(transV_),
         angV(angV_)
         {
         }
     };
-  
-}
+};
 
 // define a class, including a constructor, member variables and member functions
 
@@ -46,10 +45,15 @@ class TransformationGenerator
 public:
     TransformationGenerator();
     // TransformationGenerator(ros::NodeHandle* nodehandle);
-    // given randomly generated transformation matrix, this function can give a list of
-    // beads position
-    void getBeadsPosition(int beads_number, int row_num, int col_num, transformation_generator::ListOfPoints& list_of_points);
 
+    // A funtion, given transformation matrix, gives a list of beads position in sensor frame
+	void getBeadsPosition(int beads_number, int row_num, int col_num, 
+			transformation_generator::ListOfPoints& list_of_beads_pos,
+        	const Eigen::Affine3d trans_mat);
+
+	// A function gives new transformation matrix based on old one
+    void getNewTransformationMatrix(Eigen::Affine3d& new_trans_mat, 
+    		Eigen::Affine3d old_trans_mat, double delta_time);
     // // A function randomly generate transformation matrix
     // Eigen::Affine3d randomTransformationMatrixGenerator();
 
@@ -62,17 +66,23 @@ private:
     // member methods as well:
     // void initializePublishers();
 
-    // A function randomly generate transformation matrix
-    Eigen::Affine3d randomTransformationMatrixGenerator();
+    // // A function randomly generate transformation matrix
+    // Eigen::Affine3d randomTransformationMatrixGenerator();
 
-    // A function generate random number
-    double gaussianNumberGenerator(double LO, double HI);
+    // // A function generate random number
+    // double gaussianNumberGenerator(double LO, double HI);
 
     // A funtion generate a Exponential Matrix based on random body velocity
-    Eigen::Affine3d getExpoMatrix(velo_vec::velocityVector rand_body_velo, double delta_time, Eigen::Affine3d trans_mat);
+    Eigen::Affine3d getExpoMatrix(Eigen::Affine3d trans_mat, double delta_time);
 
     // A function to convert vector to skew-symmetric matrix
-    Eigen::Matrix3d TransformationGenerator::getSkewSymMatrix(Eigen::Vector3d vector_in)
+    Eigen::Matrix3d getSkewSymMatrix(Eigen::Vector3d vector_in);
+
+    // A funtion which generate gaussian distributed body velocity
+    void randomBodyVelocityGenerator(velo_vec::velocityVector& rand_body_velo);
+
+    // A funtion which return a double type gaussian distributed random number
+    double gaussRandNumGenerator(double mean, double deviation);
 
 };
 
