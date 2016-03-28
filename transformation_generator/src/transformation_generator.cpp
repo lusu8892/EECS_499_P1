@@ -106,9 +106,7 @@ Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& tr
     Eigen::Affine3d expo_mat;
     Eigen::Vector3d rot_omega;
     Eigen::Vector3d trans_velo;
-    Eigen::Matrix3d eye3; // 3-by-3 identity matrix
-
-    eye3 << Eigen::MatrixXd::Identity(3,3);
+    Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);; // 3-by-3 identity matrix
 
     Eigen::Matrix3d skew_trans_mat = getSkewSymMatrix(trans_mat.translation());
 
@@ -126,7 +124,7 @@ Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& tr
     // if rot_omega near to zero then assume the expo_mat linear part is 3-by-3 identity matrix
     if (rot_omega.norm() < 10e-5)
     {
-        expo_mat.linear() = eye3; // set linear part as 3-by-3 matrix
+        expo_mat.linear() = EYE_3; // set linear part as 3-by-3 matrix
         expo_mat.translation() = trans_velo;
     }
     else
@@ -137,9 +135,9 @@ Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& tr
 
         Eigen::Matrix3d skew_rot_omega = getSkewSymMatrix(rot_omega);
         
-        expo_mat.linear() = eye3 + skew_rot_omega * sin(theta) + 
+        expo_mat.linear() = EYE_3 + skew_rot_omega * sin(theta) + 
                             skew_rot_omega * skew_rot_omega * (1 - cos(theta));
-        expo_mat.translation() = (eye3 - expo_mat.linear()) * rot_omega.cross(trans_velo) +
+        expo_mat.translation() = (EYE_3 - expo_mat.linear()) * rot_omega.cross(trans_velo) +
                                 rot_omega * rot_omega.transpose() * trans_velo * theta;
     }
     return expo_mat;

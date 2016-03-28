@@ -13,6 +13,8 @@
 #include <opencv2/highgui/highgui.hpp>
 
 const double PI = 3.14159265359/2;
+const int N = 1000; // The number of particles the system generates
+const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
 
 double getUniformRandomNum(double dMinValue, double dMaxValue)
 {
@@ -52,7 +54,8 @@ double getGaussianRandomNum(double mean, double std_deviation)
 // pick, and the last two parameters are input parameters for the function you pick.
 // flag has two options to generate a rotation matrix: 1. quaternion, 2.euler(XYZ). 3. rotate by arbitrary
 Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr)(double, double), double a, double b, 
-                const std::string& flag, const Eigen::Vector3d& rotate_axis)
+                const std::string& flag, const Eigen::Vector3d& rotate_axis = Eigen::Vector3d(0,0,0)
+                const Eigen::Affine3d& input_trans_mat = MatrixXd::Random(4,4))
 {
     Eigen::Affine3d random_trans_mat;
     Eigen::Vector3d Oe;
@@ -95,6 +98,8 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr)(double, d
     return random_trans_mat;
 }
 
+
+
 int main(int argc, char** argv) {
 	ros::init(argc, argv, "particle_filter_implemetation"); //node name
 	ros::NodeHandle nh; // don't really need this in this example
@@ -105,16 +110,30 @@ int main(int argc, char** argv) {
 	srand(time(NULL)); // random number seed;
 
 	Eigen::affine3d initial_state = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 0.04, "no");
-    initial_state.linear() << Eigen::MatrixXd::Identity(3,3);
-    Eigen::affined rot_z = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 2, "euler", (0,0,1));
-    Eigen::Vector3d rot_a(cos(getUniformRandomNum(0, 2*M_PI)), sin(getUniformRandomNum(0, 2*M_PI)), 0);
-    Eigen::affined rot_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 0, 10/180, "euler", (0,0,1));
+    Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 0.04, "no");
+    initial_state.linear() = EYE_3;
+
+    // cout << initial_state.translation() << endl;
+
+    Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 2, "arbitrary", Eigen::Vector3d(0,0,1));
+    Eigen::Vector3d rot_axis(cos(getUniformRandomNum(0, 2*PI)), sin(getUniformRandomNum(0, 2*PI)), 0);
+    Eigen::Affine3d rot_mat_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 0, 10/180, "arbitrary", rot_axis);
+
+    initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
+
+    // cout << initial_state.matrix() << endl;
+
+    // make the randomly generated particles from the initial prior gaussian distribution
+
+    std::vector<Eigen::Affine3d> particles_set_trans_mat;
+    for (int i = 0; i < N; ++i)
+    {
+
+    }
 
 	while(ros::ok())
 	{
-        // beadsGenerator.getBeadsPosition(9, 3, 3, list_of_points);
-        beads_pos_pub.publish(list_of_points);
-        ros::Duration(1.0).sleep();
+        
 	}
 
 	return 0;

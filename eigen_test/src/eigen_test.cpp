@@ -9,6 +9,7 @@
 #include <math.h>
 #include <iostream>
 
+const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
 const double PI = 3.14159265359/2;
 using namespace std;
 
@@ -55,6 +56,8 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr)(double, d
     Eigen::Affine3d random_trans_mat;
     Eigen::Vector3d Oe;
     Eigen::Matrix3d Re;
+
+    
 
     Oe(0)= (*func_ptr)(a,b);
     Oe(1)= (*func_ptr)(a,b);
@@ -158,7 +161,7 @@ int main(int argc, char **argv) {
     // cout << arbitary_axis.normalize() << endl;
 
     Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 0.04, "no");
-    initial_state.linear() << Eigen::MatrixXd::Identity(3,3);
+    initial_state.linear() = EYE_3;
 
     cout << initial_state.translation() << endl;
 
@@ -169,6 +172,10 @@ int main(int argc, char **argv) {
     initial_state.linear() = rot_a.linear() * rot_z.linear() * initial_state.linear();
 
     cout << initial_state.matrix() << endl;
+
+    Eigen::Affine3d input_trans_mat = Eigen::MatrixXd::Random(4,4);
+        cout << input_trans_mat.matrix() << endl;
+
 
     return 0;
 }
