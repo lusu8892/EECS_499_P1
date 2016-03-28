@@ -49,11 +49,11 @@ public:
     // A funtion, given transformation matrix, gives a list of beads position in sensor frame
 	void getBeadsPosition(int beads_number, int row_num, int col_num, 
 			transformation_generator::ListOfPoints& list_of_beads_pos,
-        	const Eigen::Affine3d trans_mat);
+        	const Eigen::Affine3d& trans_mat);
 
 	// A function gives new transformation matrix based on old one
-    void getNewTransformationMatrix(Eigen::Affine3d& new_trans_mat, 
-    		Eigen::Affine3d old_trans_mat, double delta_time);
+    Eigen::Affine3d getNewTransformationMatrix(const Eigen::Affine3d& old_trans_mat, double delta_time);
+
     // // A function randomly generate transformation matrix
     // Eigen::Affine3d randomTransformationMatrixGenerator();
 
@@ -73,10 +73,10 @@ private:
     // double gaussianNumberGenerator(double LO, double HI);
 
     // A funtion generate a Exponential Matrix based on random body velocity
-    Eigen::Affine3d getExpoMatrix(Eigen::Affine3d trans_mat, double delta_time);
+    Eigen::Affine3d getExpoMatrix(const Eigen::Affine3d& trans_mat, double delta_time);
 
     // A function to convert vector to skew-symmetric matrix
-    Eigen::Matrix3d getSkewSymMatrix(Eigen::Vector3d vector_in);
+    Eigen::Matrix3d getSkewSymMatrix(const Eigen::Vector3d& vector_in);
 
     // A funtion which generate gaussian distributed body velocity
     void randomBodyVelocityGenerator(velo_vec::velocityVector& rand_body_velo);

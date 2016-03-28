@@ -51,7 +51,8 @@ double getGaussianRandomNum(double mean, double std_deviation)
 // the first input parameter type is function pointer which require you to insert what function name you 
 // pick, and the last two parameters are input parameters for the function you pick.
 // flag has two options to generate a rotation matrix: 1. quaternion, 2.euler(XYZ). 3. rotate by arbitrary
-Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr)(double, double), double a, double b, const std::string& flag, Eigen::Vector3d rotate_axis)
+Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr)(double, double), double a, double b, 
+                const std::string& flag, const Eigen::Vector3d& rotate_axis)
 {
     Eigen::Affine3d random_trans_mat;
     Eigen::Vector3d Oe;

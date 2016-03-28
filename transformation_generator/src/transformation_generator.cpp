@@ -8,7 +8,7 @@ const double BEADS_SEPERATION_VALUE = 0.0254;
 // Constructor
 // TransformationGenerator::TransformationGenerator(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 // {
-// 	// initializePublishers();
+//  // initializePublishers();
 // }
 
 TransformationGenerator::TransformationGenerator()
@@ -19,7 +19,7 @@ TransformationGenerator::TransformationGenerator()
 // beads position
 void TransformationGenerator::getBeadsPosition(int beads_number, int row_num, int col_num, 
         transformation_generator::ListOfPoints& list_of_beads_pos,
-        const Eigen::Affine3d trans_mat)
+        const Eigen::Affine3d& trans_mat)
 {
     list_of_beads_pos.points.clear(); // clear vector;
     geometry_msgs::Point bead_position;
@@ -48,20 +48,20 @@ void TransformationGenerator::getBeadsPosition(int beads_number, int row_num, in
 
 // void TransformationGenerator::initializePublishers()
 // {
-// 	ROS_INFO("Initializing Publishers");
-// 	beads_pos_pub_ = nh_.advertise<transformation_generator::ListOfPoints>("beads_random_position", 1, true);
-// 	//add more publishers, as needed
-// 	// note: COULD make minimal_publisher_ a public member function, if want to use it within "main()"
+//  ROS_INFO("Initializing Publishers");
+//  beads_pos_pub_ = nh_.advertise<transformation_generator::ListOfPoints>("beads_random_position", 1, true);
+//  //add more publishers, as needed
+//  // note: COULD make minimal_publisher_ a public member function, if want to use it within "main()"
 // }
 
-void TransformationGenerator::getNewTransformationMatrix(Eigen::Affine3d& new_trans_mat, 
-        Eigen::Affine3d old_trans_mat, double delta_time)
+Eigen::Affine3d TransformationGenerator::getNewTransformationMatrix(const Eigen::Affine3d& old_trans_mat, double delta_time)
 {
-    // Eigen::Affine3d new_trans_mat;
+    Eigen::Affine3d new_trans_mat;
+
     Eigen::Affine3d expo_mat = getExpoMatrix(old_trans_mat, delta_time);
 
     new_trans_mat = expo_mat * old_trans_mat;
-    // return new_trans_mat;
+    return new_trans_mat;
 }
 
 // // A function randomly generate transformation matrix
@@ -101,7 +101,7 @@ void TransformationGenerator::getNewTransformationMatrix(Eigen::Affine3d& new_tr
 //     return gaussian_num;
 // }
 
-Eigen::Affine3d TransformationGenerator::getExpoMatrix(Eigen::Affine3d trans_mat, double delta_time)
+Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& trans_mat, double delta_time)
 {
     Eigen::Affine3d expo_mat;
     Eigen::Vector3d rot_omega;
@@ -145,7 +145,7 @@ Eigen::Affine3d TransformationGenerator::getExpoMatrix(Eigen::Affine3d trans_mat
     return expo_mat;
 }
 
-Eigen::Matrix3d TransformationGenerator::getSkewSymMatrix(Eigen::Vector3d vector_in)
+Eigen::Matrix3d TransformationGenerator::getSkewSymMatrix(const Eigen::Vector3d& vector_in)
 {
     Eigen::Matrix3d t_hat;
     t_hat << 0, -vector_in(2), vector_in(1),
