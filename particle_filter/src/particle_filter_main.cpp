@@ -188,7 +188,7 @@ int main(int argc, char** argv) {
         if (g_new_image) // if a new image is available, process it.
         {
             g_new_image = false;
-            cv::Mat expected_bead_pos_image(g_new_image.size(),CV_8UC1);
+            cv::Mat expected_bead_pos_image(g_new_image.size(),CV_64FC1);
             cv::Mat result_mat();
             // for each partical
             for (int i = 0; i < N; ++i)
@@ -210,7 +210,7 @@ int main(int argc, char** argv) {
                // particles_set_trans_mat_update.push_back(Eigen::Affine3d particle_trans_mat_update);
                // beads_pos_update.push_back();
             }
-	   }
+        }
 
 	return 0;
 }

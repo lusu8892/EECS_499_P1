@@ -43,6 +43,7 @@ void TransformationGenerator::getBeadsPosition(int beads_number, int row_num, in
             list_of_beads_pos.points.push_back(bead_position);
         }
     }
+    // int npts = list_of_beads_pos.points.size();
     // beads_pos_pub_.publish(list_of_beads_pos);
 }
 
