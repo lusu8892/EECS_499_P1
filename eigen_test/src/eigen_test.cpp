@@ -11,6 +11,8 @@
 
 const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
 const double PI = 3.14159265359/2;
+const int N = 1000; // The number of particles the system generates
+
 using namespace std;
 
 double getUniformRandomNum(double dMinValue, double dMaxValue)
@@ -51,17 +53,27 @@ double getGaussianRandomNum(double mean, double std_deviation)
 // pick, and the last two parameters are input parameters for the function you pick.
 // flag has two options to generate a rotation matrix: 1. quaternion, 2.euler(XYZ). 3. rotate by arbitrary
 Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr)(double, double), double a, double b, 
-                const std::string& flag, const Eigen::Vector3d& rotate_axis = Eigen::Vector3d(0,0,0))
+                const std::string& flag, const Eigen::Vector3d& rotate_axis = Eigen::Vector3d(0,0,0),
+                const Eigen::Matrix4d input_trans_mat = Eigen::MatrixXd::Identity(4,4))
 {
     Eigen::Affine3d random_trans_mat;
     Eigen::Vector3d Oe;
     Eigen::Matrix3d Re;
+    Eigen::Affine3d temp_trans_mat;
 
+    temp_trans_mat.matrix() = input_trans_mat;
     
+    Eigen::Vector3d input_translation = temp_trans_mat.translation();
+    cout << input_translation << endl;
 
-    Oe(0)= (*func_ptr)(a,b);
-    Oe(1)= (*func_ptr)(a,b);
-    Oe(2)= (*func_ptr)(a,b);
+    cout << temp_trans_mat.linear() << endl;
+
+    Eigen::Quaterniond input_q(temp_trans_mat.linear());
+    cout << input_q.x() << " " << input_q.y() << " " << input_q.z() << " " << input_q.w() << endl; 
+
+    Oe(0)= (*func_ptr)(a,b) + input_translation(0);
+    Oe(1)= (*func_ptr)(a,b) + input_translation(1);
+    Oe(2)= (*func_ptr)(a,b) + input_translation(2);
     random_trans_mat.translation() = Oe; // the "translation" part of affine is the vector between origins
 
     if (flag == "quaternion")
@@ -69,27 +81,18 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr)(double, d
         Eigen::Quaterniond q;
         // Eigen::Quaterniond<Scalar> 
         // double magnitude;
-        q.x() = (*func_ptr)(a,b);
-        q.y() = (*func_ptr)(a,b);
-        q.z() = (*func_ptr)(a,b);
-        q.w() = (*func_ptr)(a,b);
+        q.x() = (*func_ptr)(a,b) + input_q.x();
+        q.y() = (*func_ptr)(a,b) + input_q.y();
+        q.z() = (*func_ptr)(a,b) + input_q.z();
+        q.w() = (*func_ptr)(a,b) + input_q.w();
         Re = q.normalized().toRotationMatrix();
         // Eigen::Matrix3d Re(q.normalized()); //convenient conversion...initialize a 3x3 orientation matrix
         // using a quaternion, q
         random_trans_mat.linear() = Re; // the rotational part of affine is the "linear" part
     }
-    else if (flag == "euler")
-    {
-        Re = Eigen::AngleAxisd((*func_ptr)(a,b)*PI, Eigen::Vector3d::UnitX())
-          * Eigen::AngleAxisd((*func_ptr)(a,b)*PI,  Eigen::Vector3d::UnitY())
-          * Eigen::AngleAxisd((*func_ptr)(a,b)*PI, Eigen::Vector3d::UnitZ());
-    }
     else if (flag == "arbitrary")
-    {   
-
-        cout << "rot \n" << rotate_axis << endl;
-        cout << "rotnormalized \n" <<rotate_axis.normalized() << endl;
-        Re = Eigen::AngleAxisd((*func_ptr)(a,b)*PI, rotate_axis.normalized());
+    {
+        Re = Eigen::AngleAxisd((*func_ptr)(a,b)*M_PI, rotate_axis.normalized());
     }
     else
     {
@@ -157,25 +160,24 @@ int main(int argc, char **argv) {
     // cout << Mat_uni.matrix() << endl;
     // cout << Mat_gaussian.matrix() << endl;
 
-    Eigen::Vector3d arbitary_axis(1,2,3);
-    // cout << arbitary_axis.normalize() << endl;
+    srand(time(NULL)); // random number seed;
 
     Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 0.04, "no");
     initial_state.linear() = EYE_3;
 
-    cout << initial_state.translation() << endl;
+    // cout << initial_state.translation() << endl;
 
-    Eigen::Affine3d rot_z = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 2, "arbitrary", Eigen::Vector3d(0,0,1));
-    Eigen::Vector3d rot_ax(cos(getUniformRandomNum(0, 2*PI)), sin(getUniformRandomNum(0, 2*PI)), 0);
-    Eigen::Affine3d rot_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 0, 10/180, "arbitrary", rot_ax);
+    Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 2, "arbitrary", Eigen::Vector3d(0,0,1));
+    Eigen::Vector3d rot_axis(cos(getUniformRandomNum(0, 2*PI)), sin(getUniformRandomNum(0, 2*PI)), 0);
+    Eigen::Affine3d rot_mat_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 0, 10/180, "arbitrary", rot_axis);
 
-    initial_state.linear() = rot_a.linear() * rot_z.linear() * initial_state.linear();
+    initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
 
-    cout << initial_state.matrix() << endl;
+    std::vector<Eigen::Affine3d> particles_set_trans_mat;
+    for (int i = 0; i < N; ++i)
+    {
 
-    Eigen::Affine3d input_trans_mat = Eigen::MatrixXd::Random(4,4);
-        cout << input_trans_mat.matrix() << endl;
-
+    }
 
     return 0;
 }
