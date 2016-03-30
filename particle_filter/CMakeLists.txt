@@ -149,7 +149,7 @@ add_executable(particle_filter_main src/particle_filter_main.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(particle_filter_main
-transformation_generator ${catkin_LIBRARIES}
+	${catkin_LIBRARIES}
     ${OpenCV_LIBRARIES}
 ) 
 

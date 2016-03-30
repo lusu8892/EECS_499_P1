@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
     std::vector<Eigen::Affine3d> particles_set_trans_mat;
     for (int i = 0; i < N; ++i)
     {
-
+        
     }
 
     return 0;

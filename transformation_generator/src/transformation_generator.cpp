@@ -26,7 +26,7 @@ void TransformationGenerator::getBeadsPosition(int beads_number, int row_num, in
 
     Eigen::Vector3d Ob;
     
-    Eigen::Vector3d Oe = trans_mat.translation();
+    // Eigen::Vector3d Oe = trans_mat.translation();
     Eigen::Vector3d beads_in_sensor_frame;
 
     for (int i = 0; i < row_num; ++i)

@@ -1,6 +1,8 @@
 // paticle_filter_main.cpp //
 /// This is the main function of the implementation of particle filter to track
 /// the beads position based on the segmented image source
+/// the particle are presented as transformation matrix from body to camera frame
+/// based on each particle, 9 beads were created by opencv function
 
 #include <ros/ros.h>
 #include <transformation_generator/transformation_generator.h>
@@ -15,10 +17,10 @@
 #include <cwru_opencv_common/opencv_geometry_3d.h>
 #include <cwru_opencv_common/projective_geometry.h>
 
-const double PI = 3.14159265359/2;
+const double PI = 3.14159265359;
 const int N = 1000; // The number of particles the system generates
 const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
-const double RADIUS = 0.0082;
+const double RADIUS = 0.0082/2;
 
 using namespace std;
 using namespace cv_3d;
@@ -98,7 +100,7 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr)(double, d
     }
     else if (flag == "arbitrary")
     {
-        Re = Eigen::AngleAxisd((*func_ptr)(a,b)*M_PI, rotate_axis.normalized());
+        Re = Eigen::AngleAxisd((*func_ptr)(a,b)*PI, rotate_axis.normalized());
     }
     else
     {
@@ -122,7 +124,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& segemented_image)
         g_new_image = true;
     }
     catch (cv_bridge::Exception& e)
-    {
+    {   
         //if there is an error during conversion, display it
         ROS_ERROR("tutorialROSOpenCV::main.cpp::cv_bridge exception: %s", e.what());
         return;
@@ -133,10 +135,14 @@ int main(int argc, char** argv) {
 	ros::init(argc, argv, "particle_filter_implemetation"); //node name
 	ros::NodeHandle nh; // don't really need this in this example
 	ros::Publisher beads_pos_pub = nh.advertise<transformation_generator::ListOfPoints>("beads_random_position", 1);
-    ros::Publisher img_sub = nh.subscribe("/image_rect", 1, imageCallback);
+
+    image_transport::ImageTransport it(nh);
+    image_transport::Subscriber img_sub = it.subscribe("/image_rect_seg", 1, &imageCallback);
+    // ros::Subscriber img_sub = nh.subscribe("/image_rect_seg", 1, imageCallback);
 
 	TransformationGenerator beadsGenerator; // instaniate an object of TransformationGenerator
 
+    ros::Duration sleep(0.5);
     // instaniate a camera projection matrix object
     cv_projective::cameraProjectionMatrices cam_proj_mat(nh, std::string("/camera/camera_info"), std::string("/camera/camera_info"));
     cv::Mat P_mat; // define a cv::Mat variable to store projection matrix
@@ -175,42 +181,64 @@ int main(int argc, char** argv) {
     vector<Eigen::Affine3d> particles_set_trans_mat_update;
     vector<transformation_generator::ListOfPoints> beads_pos_update;
     
-    
-
     double delta_time = 2;
 	while(ros::ok())
 	{   
-        ros::spinOnce();
+        
         P_mat = cam_proj_mat.getLeftProjectionMatrix();
 
         particles_set_trans_mat_update.resize(particles_set_trans_mat.size());
         beads_pos_update.resize(particles_set_trans_mat.size());
+
         if (g_new_image) // if a new image is available, process it.
         {
             g_new_image = false;
-            cv::Mat expected_bead_pos_image(g_new_image.size(),CV_64FC1);
-            cv::Mat result_mat();
-            // for each partical
+            
+
+            
+            // for each particle
             for (int i = 0; i < N; ++i)
             {  
+                // get one new particle from last step
                 Eigen::Affine3d particle_trans_mat_update = beadsGenerator.getNewTransformationMatrix(particles_set_trans_mat[i], delta_time);
+                ROS_INFO_STREAM("updated particle trans mat \n" << particle_trans_mat_update.matrix());
+                // generate 9 beads position in camera frame
                 beadsGenerator.getBeadsPosition(9, 3, 3, list_of_points, particle_trans_mat_update);
+                ROS_INFO_STREAM("beads position generated");
                 // beads_pos_update[i] = list_of_points;
                 int npts = list_of_points.points.size();
 
-                // cv::Mat expected_bead_pos_image();
+                // define the expected beads image mat for each particle
+                cv::Mat expected_bead_pos_image(g_frame_in.size(), CV_8UC1);
+                // the weight for each particle
+                cv::Mat result_mat;
+                    
+                // for 9 beads;
                 for (int k = 0; k < npts; ++k)
                 {   
+                    ROS_INFO("start to draw each bead at one time");
                     // convert ros geomertry/points to cv::Point3d
-                    cv::Point3d bead_pos_i(list_of_points[k].points.x(), list_of_points[k].points.y(), list_of_points[k].points.z()); 
-                    cv:Rect bead_rendered_i = cv_3d::renderSphere(expected_bead_pos_image, cv_3d::sphere(bead_pos_i, RADIUS), P_mat);
-                }
-                cv::matchTemplate(g_new_image, expected_bead_pos_image, result_mat, CV_TM_CCOEFF_NORMED);
+                    cv::Point3d bead_i_pos(list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
+                    ROS_INFO("bead center <%f, %f, %f>", list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
 
-               // particles_set_trans_mat_update.push_back(Eigen::Affine3d particle_trans_mat_update);
-               // beads_pos_update.push_back();
+                    ROS_INFO("start to render sphere");
+
+                    cv::Rect bead_i_rendered = cv_3d::renderSphere(expected_bead_pos_image, cv_3d::sphere(bead_i_pos, RADIUS), P_mat);
+
+                    ROS_INFO("one bead drawn");
+                    // imshow("Black Beads", bead_i_rendered);
+                }
+                ROS_INFO_STREAM("finish beads drawing for one particle");
+                imshow("beads drawing", expected_bead_pos_image);
+                cv::matchTemplate(g_frame_in, expected_bead_pos_image, result_mat, CV_TM_CCOEFF_NORMED);
+                ROS_INFO_STREAM("weight" << result_mat);
+                // particles_set_trans_mat_update.push_back(Eigen::Affine3d particle_trans_mat_update);
+                // beads_pos_update.push_back();
             }
         }
 
+        sleep.sleep();
+        ros::spinOnce();
+    }
 	return 0;
 }
