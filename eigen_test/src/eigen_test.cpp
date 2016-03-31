@@ -14,6 +14,7 @@ const double PI = 3.14159265359/2;
 const int N = 1000; // The number of particles the system generates
 
 using namespace std;
+using namespace Eigen;
 
 double getUniformRandomNum(double dMinValue, double dMaxValue)
 {
@@ -81,10 +82,10 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr)(double, d
         Eigen::Quaterniond q;
         // Eigen::Quaterniond<Scalar> 
         // double magnitude;
-        q.x() = (*func_ptr)(a,b) + input_q.x();
-        q.y() = (*func_ptr)(a,b) + input_q.y();
-        q.z() = (*func_ptr)(a,b) + input_q.z();
-        q.w() = (*func_ptr)(a,b) + input_q.w();
+        // q.x() = (*func_ptr)(a,b) + input_q.x();
+        // q.y() = (*func_ptr)(a,b) + input_q.y();
+        // q.z() = (*func_ptr)(a,b) + input_q.z();
+        // q.w() = (*func_ptr)(a,b) + input_q.w();
         Re = q.normalized().toRotationMatrix();
         // Eigen::Matrix3d Re(q.normalized()); //convenient conversion...initialize a 3x3 orientation matrix
         // using a quaternion, q
@@ -110,74 +111,74 @@ int main(int argc, char **argv) {
     Eigen::Matrix3d I;
     Eigen::Vector3d T;
 
-    Eigen::Affine3d Mat_1;
-    Mat_1.linear() << Eigen::MatrixXd::Identity(3,3);
-    Mat_1.translation() << 0,0,0;
+    // Eigen::Affine3d Mat_1;
+    // Mat_1.linear() << Eigen::MatrixXd::Identity(3,3);
+    // Mat_1.translation() << 0,0,0;
 
-    Eigen::Affine3d Mat_2;
-    Mat_2.linear() << Eigen::MatrixXd::Identity(3,3);
-    Mat_2.translation() << 0,0,0;
+    // Eigen::Affine3d Mat_2;
+    // Mat_2.linear() << Eigen::MatrixXd::Identity(3,3);
+    // Mat_2.translation() << 0,0,0;
 
-    Eigen::Affine3d Mat_3 = Mat_1 * Mat_2;
+    // Eigen::Affine3d Mat_3 = Mat_1 * Mat_2;
 
-    // Mat_3.matrix() = Mat_1.matrix() * Mat_2.matrix();
+    // // Mat_3.matrix() = Mat_1.matrix() * Mat_2.matrix();
 
-    T = Mat_1.translation();
-    // srand(time(NULL)); // random number seed;
-    // typedef double (*TestTypeFuncPtr)(double, double);
-    // TestTypeFuncPtr  func_uniform = getUniformRandomNum;
-    // TestTypeFuncPtr func_gaussian = getGaussianRandomNum;
-    // Mat_1 << 1,2,3,4,
-    //        4,5,6,7,
-    //        7,8,9,10,
-    //        11,12,13,14;
-    // ros::Publisher my_publisher_object = n.advertise<std_msgs::Float64>("topic1", 1);
-    // //"topic1" is the name of the topic to which we will publish
-    // // the "1" argument says to use a buffer size of 1; could make larger, if expect network backups
+    // T = Mat_1.translation();
+    // // srand(time(NULL)); // random number seed;
+    // // typedef double (*TestTypeFuncPtr)(double, double);
+    // // TestTypeFuncPtr  func_uniform = getUniformRandomNum;
+    // // TestTypeFuncPtr func_gaussian = getGaussianRandomNum;
+    // // Mat_1 << 1,2,3,4,
+    // //        4,5,6,7,
+    // //        7,8,9,10,
+    // //        11,12,13,14;
+    // // ros::Publisher my_publisher_object = n.advertise<std_msgs::Float64>("topic1", 1);
+    // // //"topic1" is the name of the topic to which we will publish
+    // // // the "1" argument says to use a buffer size of 1; could make larger, if expect network backups
     
-    // std_msgs::Float64 input_float; //create a variable of type "Float64", 
-    // // as defined in: /opt/ros/indigo/share/std_msgs
-    // // any message published on a ROS topic must have a pre-defined format_1, 
-    // // so subscribers know how to interpret the serialized data transmission
+    // // std_msgs::Float64 input_float; //create a variable of type "Float64", 
+    // // // as defined in: /opt/ros/indigo/share/std_msgs
+    // // // any message published on a ROS topic must have a pre-defined format_1, 
+    // // // so subscribers know how to interpret the serialized data transmission
    
-    ros::Rate naptime(2.0); //create a ros object from the ros “Rate” class; 
-    //set the sleep timer for 1Hz repetition rate (arg is in units of Hz)
+    // ros::Rate naptime(2.0); //create a ros object from the ros “Rate” class; 
+    // //set the sleep timer for 1Hz repetition rate (arg is in units of Hz)
 
-    // input_float.data = 0.0;
-    // Eigen::Affine3d Mat_uni =  randomTransformationMatrixGenerator(getUniformRandomNum, 1, 1,"euler");
-    // Eigen::Affine3d Mat_gaussian = randomTransformationMatrixGenerator(getGaussianRandomNum, 1, 1, "quaternion");
-    double rnd;
-    // do work here in infinite loop (desired for this example), but terminate if detect ROS has faulted
-    // for (int i = 0; i < 10; ++i) 
-    // {
-    //     rnd = randomUniform(1, 1);
-    //     cout <<  rnd << endl;
-    //     // cout <<  T << endl;
-	   //  // naptime.sleep(); 
-    // }
-    // double x = 5;
-    // cout << *(&x) << endl;
-    // cout << Mat_uni.matrix() << endl;
-    // cout << Mat_gaussian.matrix() << endl;
+    // // input_float.data = 0.0;
+    // // Eigen::Affine3d Mat_uni =  randomTransformationMatrixGenerator(getUniformRandomNum, 1, 1,"euler");
+    // // Eigen::Affine3d Mat_gaussian = randomTransformationMatrixGenerator(getGaussianRandomNum, 1, 1, "quaternion");
+    // double rnd;
+    // // do work here in infinite loop (desired for this example), but terminate if detect ROS has faulted
+    // // for (int i = 0; i < 10; ++i) 
+    // // {
+    // //     rnd = randomUniform(1, 1);
+    // //     cout <<  rnd << endl;
+    // //     // cout <<  T << endl;
+	   // //  // naptime.sleep(); 
+    // // }
+    // // double x = 5;
+    // // cout << *(&x) << endl;
+    // // cout << Mat_uni.matrix() << endl;
+    // // cout << Mat_gaussian.matrix() << endl;
 
-    srand(time(NULL)); // random number seed;
+    // srand(time(NULL)); // random number seed;
 
-    Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 0.04, "no");
-    initial_state.linear() = EYE_3;
+    // Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 0.04, "no");
+    // initial_state.linear() = EYE_3;
 
-    // cout << initial_state.translation() << endl;
+    // // cout << initial_state.translation() << endl;
 
-    Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 2, "arbitrary", Eigen::Vector3d(0,0,1));
-    Eigen::Vector3d rot_axis(cos(getUniformRandomNum(0, 2*PI)), sin(getUniformRandomNum(0, 2*PI)), 0);
-    Eigen::Affine3d rot_mat_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 0, 10/180, "arbitrary", rot_axis);
+    // Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getUniformRandomNum, 0, 2, "arbitrary", Eigen::Vector3d(0,0,1));
+    // Eigen::Vector3d rot_axis(cos(getUniformRandomNum(0, 2*PI)), sin(getUniformRandomNum(0, 2*PI)), 0);
+    // Eigen::Affine3d rot_mat_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 0, 10/180, "arbitrary", rot_axis);
 
-    initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
+    // initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
 
-    std::vector<Eigen::Affine3d> particles_set_trans_mat;
-    for (int i = 0; i < N; ++i)
-    {
-        
-    }
+    Matrix3d M_1; Matrix3d M_2;
+    M_1 << 1,3,4,5,6,3,1,3,4;
+    M_2 << 3,2,1,4,6,7,9,1,2;
 
+    cout << M_1 * M_2 << endl;
+    cout << M_2 * M_1 << endl;
     return 0;
 }

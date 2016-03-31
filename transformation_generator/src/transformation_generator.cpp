@@ -164,7 +164,7 @@ void TransformationGenerator::randomBodyVelocityGenerator(velo_vec::velocityVect
     double mean_t = 0.0; // translation mean
     double deviation_t = 0.05; // translation deviation
     double mean_r = 0.0; // rotation mean
-    double deviation_r = 0.8; // rotation deviation
+    double deviation_r = 0.05; // rotation deviation
 
     // generate random body velocity translation part given specified mean and deviation
     trans_velo(0) = gaussRandNumGenerator(mean_t, deviation_t);

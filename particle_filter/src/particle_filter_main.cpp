@@ -5,6 +5,8 @@
 /// based on each particle, 9 beads were created by opencv function
 
 #include <ros/ros.h>
+#include <ros/console.h>
+#include <time.h>
 #include <transformation_generator/transformation_generator.h>
 // #include <particle_weight/particle_weight.h>
 
@@ -21,6 +23,7 @@ const double PI = 3.14159265359;
 const int N = 1000; // The number of particles the system generates
 const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
 const double RADIUS = 0.0082/2;
+
 
 using namespace std;
 using namespace cv_3d;
@@ -68,16 +71,18 @@ double getGaussianRandomNum(double mean, double std_deviation)
 Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr_0)(double, double),
                 double (*func_ptr_1)(double, double),
                 const std::string& flag, 
-                double a = 0, double b = 0, double c = 0, double d = 0, 
-                double e = 0, double f = 0, double g = 0, double h = 0, 
+                double a = 0, double b = 0, double c = 0, double d = 0, double e = 0, 
+                double f = 0, double g = 0, double h = 0, double i = 0, double j = 0,
                 const Eigen::Vector3d& rotate_axis = Eigen::Vector3d(0,0,0),
-                const Eigen::Matrix4d input_trans_mat = Eigen::MatrixXd::Identity(4,4))
+                const Eigen::Matrix4d& input_trans_mat = Eigen::MatrixXd::Identity(4,4))
 {
     Eigen::Affine3d random_trans_mat;
     Eigen::Vector3d Oe;
     Eigen::Matrix3d Re;
 
     Eigen::Affine3d temp_trans_mat;
+
+    // ROS_INFO_STREAM("the input trans mat \n" << input_trans_mat.matrix());
 
     temp_trans_mat.matrix() = input_trans_mat;
     
@@ -92,12 +97,18 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr_0)(double,
     if (flag == "quaternion")
     {
         Eigen::Quaterniond q;
+        Eigen::Quaterniond q_perturbation;
+        q_perturbation.x() = (*func_ptr_1)(g,h);
+        q_perturbation.y() = (*func_ptr_1)(g,h);
+        q_perturbation.z() = (*func_ptr_1)(g,h);
+        q_perturbation.w() = (*func_ptr_0)(i,j);
         // Eigen::Quaterniond<Scalar> 
         // double magnitude;
-        q.x() = (*func_ptr_1)(g,h) + input_q.x();
-        q.y() = (*func_ptr_1)(g,h) + input_q.y();
-        q.z() = (*func_ptr_1)(g,h) + input_q.z();
-        q.w() = (*func_ptr_1)(g,h) + input_q.w();
+        // q.x() = (*func_ptr_1)(g,h) + input_q.x();
+        // q.y() = (*func_ptr_1)(g,h) + input_q.y();
+        // q.z() = (*func_ptr_1)(g,h) + input_q.z();
+        // q.w() = (*func_ptr_1)(g,h) + input_q.w();
+        q = q_perturbation.normalized() * input_q.normalized();
         Re = q.normalized().toRotationMatrix();
         // Eigen::Matrix3d Re(q.normalized()); //convenient conversion...initialize a 3x3 orientation matrix
         // using a quaternion, q
@@ -147,9 +158,10 @@ int main(int argc, char** argv) {
     image_transport::Subscriber img_sub = it.subscribe("/image_rect_seg", 1, &imageCallback);
     // ros::Subscriber img_sub = nh.subscribe("/image_rect_seg", 1, imageCallback);
 
+    cv::namedWindow( "particle filter", 1 );
 	TransformationGenerator beadsGenerator; // instaniate an object of TransformationGenerator
 
-    ros::Duration sleep(0.5);
+    ros::Duration sleep(0.1);
     // instaniate a camera projection matrix object
     cv_projective::cameraProjectionMatrices cam_proj_mat(nh, std::string("/camera/camera_info"), std::string("/camera/camera_info"));
     cv::Mat P_mat; // define a cv::Mat variable to store projection matrix
@@ -160,27 +172,27 @@ int main(int argc, char** argv) {
 	srand(time(NULL)); // random number seed;
 
     Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getUniformRandomNum, 
-                                    getUniformRandomNum, "no", -0.3, 0.3, -0.2, 0.2, 0.1, 0.5, 0, 0);
+                                    getUniformRandomNum, "no", -0.3, 0.3, -0.2, 0.2, 0.3, 0.8, 0, 0,0,0);
     
     initial_state.linear()(0,0) = -1; initial_state.linear()(2,2) = -1;
 
-    cout << initial_state.linear() << endl;
+    ROS_INFO_STREAM("initial state rotation part \n" << initial_state.linear());
 
     Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getUniformRandomNum, 
-                                getUniformRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 2, Eigen::Vector3d(0,0,1));
+                                getUniformRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, Eigen::Vector3d(0,0,1));
 
     double theta = getUniformRandomNum(0, 2*PI);
     Eigen::Vector3d rot_axis(cos(theta), sin(theta), 0);
     
     Eigen::Affine3d rot_mat_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 
-                            getGaussianRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 10/180, rot_axis);
+                            getGaussianRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 10/180, 0, 0, rot_axis);
 
     // paticle filter starts from there
     initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
 
     // convert Eigen::Affine3d transformation matrix to flat 4-by-4 Eigen::Matrix4d type
     Eigen::Matrix4d initial_state_mat = initial_state.matrix();
-    // cout << initial_state.matrix() << endl;
+    ROS_INFO_STREAM("initial state mat \n" << initial_state.matrix());
 
     // make the randomly generated particles from the initial prior gaussian distribution
     // each partical is a transformation matrix from body frame to camera frame
@@ -189,31 +201,46 @@ int main(int argc, char** argv) {
     {
         Eigen::Affine3d partical_trans_mat;
         partical_trans_mat = randomTransformationMatrixGenerator(getUniformRandomNum, 
-                getGaussianRandomNum, "quaternion", -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, 0, 0.1, Eigen::Vector3d(0,0,0), initial_state_mat);
+                getGaussianRandomNum, "quaternion", -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.1, 0.1, 0.9, 1, Eigen::Vector3d(0,0,0), initial_state_mat);
         particles_set_trans_mat.push_back(partical_trans_mat);
+        // ROS_INFO_STREAM("partical initial trans mat \n" << partical_trans_mat.matrix());
+
     }
 
     vector<Eigen::Affine3d> particles_set_trans_mat_update;
     vector<transformation_generator::ListOfPoints> beads_pos_update;
+    vector<cv::Mat>  weight_vec;
+    cv::Mat weight_sum;
     
-    double delta_time = 2;
+    // double delta_time = 0.02;
+    double loop_begin = ros::Time::now().toSec(); // set a time for recording the start time of each iteration
+    double loop_end = ros::Time::now().toSec(); // set a time for recording end time of each iteration
+
+    double delta_time = loop_end - loop_begin;
+
+    // ROS_INFO("delta_time = %f", delta_time);
+
 	while(ros::ok())
 	{   
-        
-        P_mat = cam_proj_mat.getLeftProjectionMatrix();
-
-        particles_set_trans_mat_update.resize(particles_set_trans_mat.size());
-        beads_pos_update.resize(particles_set_trans_mat.size());
+        // ros::console::shutdown();
 
         if (g_new_image) // if a new image is available, process it.
         {
-            g_new_image = false;
-            
+            loop_begin = ros::Time::now().toSec();
+            // delta_time = loop_end - loop_begin;
+            ROS_INFO("delta_time = %f", delta_time);
+            P_mat = cam_proj_mat.getLeftProjectionMatrix();
 
-            
+            particles_set_trans_mat_update.clear();
+            beads_pos_update.clear();
+            weight_vec.clear();
+            weight_sum.release(); // clear weight_sum;
+
+            g_new_image = false;
+            // begin = ros::Time::now().toSec();
             // for each particle
             for (int i = 0; i < N; ++i)
-            {  
+            {
                 // get one new particle from last step
                 Eigen::Affine3d particle_trans_mat_update = beadsGenerator.getNewTransformationMatrix(particles_set_trans_mat[i], delta_time);
                 ROS_INFO_STREAM("updated particle trans mat \n" << particle_trans_mat_update.matrix());
@@ -225,35 +252,56 @@ int main(int argc, char** argv) {
 
                 // define the expected beads image mat for each particle
                 cv::Mat expected_bead_pos_image(g_frame_in.size(), CV_8UC1);
-                // the weight for each particle
-                cv::Mat result_mat;
-                    
+                
+                // define the expected beads image mat for each particle
+                cv::Mat weight;
+
                 // for 9 beads;
                 for (int k = 0; k < npts; ++k)
                 {   
-                    ROS_INFO("start to draw each bead at one time");
+                    // ROS_INFO("start to draw each bead at one time");
                     // convert ros geomertry/points to cv::Point3d
                     cv::Point3d bead_i_pos(list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
-                    ROS_INFO("bead center <%f, %f, %f>", list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
+                    // ROS_INFO("bead center <%f, %f, %f>", list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
 
-                    ROS_INFO("start to render sphere");
+                    // ROS_INFO("start to render sphere");
 
                     cv::Rect bead_i_rendered = cv_3d::renderSphere(expected_bead_pos_image, cv_3d::sphere(bead_i_pos, RADIUS), P_mat);
 
-                    ROS_INFO("one bead drawn");
+                    // ROS_INFO("one bead drawn");
                     // imshow("Black Beads", bead_i_rendered);
                 }
-                ROS_INFO_STREAM("finish beads drawing for one particle");
-                imshow("beads drawing", expected_bead_pos_image);
-                cv::matchTemplate(g_frame_in, expected_bead_pos_image, result_mat, CV_TM_CCOEFF_NORMED);
-                ROS_INFO_STREAM("weight" << result_mat);
+                // ROS_INFO("finish beads drawing for one particle");
+                cv::imshow("particle filter", expected_bead_pos_image);
+                cv::waitKey(10);
+                cv::matchTemplate(g_frame_in, expected_bead_pos_image, weight, CV_TM_CCOEFF_NORMED);
+                weight_vec.push_back(weight);
+                ROS_INFO_STREAM("weight" << weight);
                 // particles_set_trans_mat_update.push_back(Eigen::Affine3d particle_trans_mat_update);
                 // beads_pos_update.push_back();
             }
+
+            // Normalize weight vector to form a probability distribution (i.e. sum to 1).
+            for(vector<cv::Mat>::iterator it = weight_vec.begin(); it != weight_vec.end(); ++it)
+            {
+                weight_sum += *it;
+            }
+            for (int i = 0; i < weight_vec.size(); ++i)
+            {
+                weight_vec[i] = weight_vec[i] / weight_sum;     
+            }
+            
+
+            // loop_end = ros::Time::now().toSec();
         }
+        // loop_end = ros::Time::now().toSec();
+        // delta_time = loop_end - loop_begin;
 
         sleep.sleep();
+        loop_end = ros::Time::now().toSec();
+        delta_time = loop_end - loop_begin;
         ros::spinOnce();
+        // delta_time = loop_end - loop_begin;
     }
 	return 0;
 }
