@@ -161,17 +161,20 @@ void TransformationGenerator::randomBodyVelocityGenerator(velo_vec::velocityVect
     Eigen::Vector3d trans_velo;
     Eigen::Vector3d rot_omega;
 
-    double mean = 0.0; // given a specific mean value
-    double deviation = 4.0; // given a specific deviation
+    double mean_t = 0.0; // translation mean
+    double deviation_t = 0.05; // translation deviation
+    double mean_r = 0.0; // rotation mean
+    double deviation_r = 0.8; // rotation deviation
+
     // generate random body velocity translation part given specified mean and deviation
-    trans_velo(0) = gaussRandNumGenerator(mean, deviation);
-    trans_velo(1) = gaussRandNumGenerator(mean, deviation);
-    trans_velo(2) = gaussRandNumGenerator(mean, deviation);
+    trans_velo(0) = gaussRandNumGenerator(mean_t, deviation_t);
+    trans_velo(1) = gaussRandNumGenerator(mean_t, deviation_t);
+    trans_velo(2) = gaussRandNumGenerator(mean_t, deviation_t);
     
     // generate random body velocity rotation part given specified mean and deviation
-    rot_omega(0) = gaussRandNumGenerator(mean, deviation);
-    rot_omega(1) = gaussRandNumGenerator(mean, deviation);
-    rot_omega(2) = gaussRandNumGenerator(mean, deviation); 
+    rot_omega(0) = gaussRandNumGenerator(mean_r, deviation_r);
+    rot_omega(1) = gaussRandNumGenerator(mean_r, deviation_r);
+    rot_omega(2) = gaussRandNumGenerator(mean_r, deviation_r); 
 
     rand_body_velo.transV = trans_velo;
     rand_body_velo.angV = rot_omega;
