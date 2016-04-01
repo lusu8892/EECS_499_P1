@@ -161,9 +161,10 @@ int main(int argc, char** argv) {
     cv::namedWindow( "particle filter", 1 );
 	TransformationGenerator beadsGenerator; // instaniate an object of TransformationGenerator
 
-    ros::Duration sleep(0.5);
+    ros::Duration sleep(0.1);
     // instaniate a camera projection matrix object
-    cv_projective::cameraProjectionMatrices cam_proj_mat(nh, std::string("/camera/camera_info"), std::string("/camera/camera_info"));
+    cv_projective::cameraProjectionMatrices cam_proj_mat(nh, 
+            std::string("/camera/camera_info"), std::string("/camera/camera_info"));
     cv::Mat P_mat; // define a cv::Mat variable to store projection matrix
 
     // instaniate an variable of message of transformation_generator::ListOfPoints
@@ -257,6 +258,7 @@ int main(int argc, char** argv) {
 
                 // define the expected beads image mat for each particle
                 cv::Mat expected_bead_pos_image(g_frame_in.size(), CV_8UC1);
+                expected_bead_pos_image *= 0;
                 
                 // define a mat to store the two expected and observed image
                 cv::Mat blended_image(g_frame_in.size(), CV_8UC1);
@@ -282,7 +284,7 @@ int main(int argc, char** argv) {
                 // ROS_INFO("finish beads drawing for one particle");
                 cv::addWeighted(expected_bead_pos_image, 0.7, g_frame_in, 0.3, 0.0, blended_image);
                 cv::imshow("particle filter", blended_image);
-                cv::waitKey(1);
+                cv::waitKey(5);
                 cv::matchTemplate(g_frame_in, expected_bead_pos_image, weight, CV_TM_CCOEFF_NORMED);
                 weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
                 // ROS_INFO_STREAM("weight =" << weight.at<float>(0,0));
@@ -291,36 +293,58 @@ int main(int argc, char** argv) {
                 count += 1;
                 // ROS_INFO("numbers of particle generated = %d", count);
             }
-            ROS_INFO("numbers of particle updated %d", (int)particles_set_update.size());
+            // ROS_INFO("numbers of particle updated %d", (int)particles_set_update.size());
             // Normalize weight vector to form a probability distribution (i.e. sum to 1).
             for(vector<float>::iterator it = weight_vec.begin(); it < weight_vec.end(); ++it)
             {
                 weight_sum += *it;
             }
+            // ROS_INFO_STREAM("weight_vec size = " << weight_vec.size());
             for (int i = 0; i < weight_vec.size(); ++i)
             {
                 weight_vec[i] = weight_vec[i] / weight_sum;     
             }
+
+            weight_sum = 0; // set wet sum to zero
+            for (vector<float>::iterator it = weight_vec.begin(); it < weight_vec.end(); ++it)
+            {
+                weight_sum += *it;
+            }
+            ROS_INFO_STREAM("normalized weight sum = " << weight_sum);
+
             // implement low_variance_sampler
             float N_inv = (float)1/ float(N);
             float r = getUniformRandomNum(0, N_inv);
+            ROS_INFO("r = %f", r);
             float c = weight_vec[0]; // get the first particle's weight
             // ROS_INFO("fisrt weight %f", c);
             int indicator = 0;
             float U = 0;
-            
+            particles_set.clear();
             for (int m = 0; m < N; ++m)
             {
                 U = r + (float)m * N_inv;
-                ROS_INFO("U = %f", U);
+                // ROS_INFO("U = %f", U);
                 while (U > c)
                 {
-                    indicator += 1;
+                    indicator = indicator + 1;
+                    // if (indicator > N)
+                    // {
+                    //     break;
+                    // }
+                    // else
+                    // {
+                    //     c = c + weight_vec[indicator];
+                    // }
                     c = c + weight_vec[indicator];
-                    ROS_INFO("indicator %d", indicator);
+                    // ROS_INFO("indicator %d", indicator);
                 }
-                particles_set[m] = particles_set_update[indicator];
+                
+                particles_set.push_back(particles_set_update[indicator]);
+                // ROS_INFO_STREAM("mat \n" << particles_set_update[indicator].matrix());
             }
+            cout << "indicator = " << indicator << endl;
+            ROS_INFO("particle set size = %d", (int)particles_set.size());
             // loop_end = ros::Time::now().toSec();
             loop_end = ros::Time::now().toSec();
             delta_time = loop_end - loop_begin;

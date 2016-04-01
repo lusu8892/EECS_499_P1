@@ -51,7 +51,7 @@ int main(int argc, char** argv )
     ros::NodeHandle nh;
 
     image_transport::ImageTransport it(nh);
-    image_transport::Subscriber img_sub = it.subscribe("/image_rect", 1, &imageCallback);
+    image_transport::Subscriber img_sub = it.subscribe("/davinci_endo/left/image_rect", 1, &imageCallback);
       
     image_transport::Publisher img_pub = it.advertise("/image_rect_seg",1);
 
