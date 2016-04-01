@@ -20,7 +20,7 @@
 #include <cwru_opencv_common/projective_geometry.h>
 
 const double PI = 3.14159265359;
-const int N = 1000; // The number of particles the system generates
+const int N = 100; // The number of particles the system generates
 const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
 const double RADIUS = 0.0082/2;
 
@@ -196,18 +196,18 @@ int main(int argc, char** argv) {
 
     // make the randomly generated particles from the initial prior gaussian distribution
     // each partical is a transformation matrix from body frame to camera frame
-    vector<Eigen::Affine3d> particles_set_trans_mat;
+    vector<Eigen::Affine3d> particles_set;
     for (int i = 0; i < N; ++i)
     {
         Eigen::Affine3d partical_trans_mat;
         partical_trans_mat = randomTransformationMatrixGenerator(getUniformRandomNum, 
                 getGaussianRandomNum, "quaternion", -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.1, 0.1, 0.9, 1, Eigen::Vector3d(0,0,0), initial_state_mat);
-        particles_set_trans_mat.push_back(partical_trans_mat);
+        particles_set.push_back(partical_trans_mat);
         // ROS_INFO_STREAM("partical initial trans mat \n" << partical_trans_mat.matrix());
 
     }
 
-    vector<Eigen::Affine3d> particles_set_trans_mat_update;
+    vector<Eigen::Affine3d> particles_set_update;
     vector<transformation_generator::ListOfPoints> beads_pos_update;
     vector<cv::Mat>  weight_vec;
     cv::Mat weight_sum;
@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
     double loop_begin = ros::Time::now().toSec(); // set a time for recording the start time of each iteration
     double loop_end = ros::Time::now().toSec(); // set a time for recording end time of each iteration
 
-    double delta_time = loop_end - loop_begin;
+    double delta_time = 0;
 
     // ROS_INFO("delta_time = %f", delta_time);
 
@@ -227,22 +227,24 @@ int main(int argc, char** argv) {
         if (g_new_image) // if a new image is available, process it.
         {
             loop_begin = ros::Time::now().toSec();
-            // delta_time = loop_end - loop_begin;
+            delta_time = loop_end - loop_begin;
             ROS_INFO("delta_time = %f", delta_time);
             P_mat = cam_proj_mat.getLeftProjectionMatrix();
 
-            particles_set_trans_mat_update.clear();
+            particles_set_update.clear();
             beads_pos_update.clear();
             weight_vec.clear();
             weight_sum.release(); // clear weight_sum;
 
             g_new_image = false;
+
+            int count = 0;
             // begin = ros::Time::now().toSec();
             // for each particle
             for (int i = 0; i < N; ++i)
             {
                 // get one new particle from last step
-                Eigen::Affine3d particle_trans_mat_update = beadsGenerator.getNewTransformationMatrix(particles_set_trans_mat[i], delta_time);
+                Eigen::Affine3d particle_trans_mat_update = beadsGenerator.getNewTransformationMatrix(particles_set[i], delta_time);
                 ROS_INFO_STREAM("updated particle trans mat \n" << particle_trans_mat_update.matrix());
                 // generate 9 beads position in camera frame
                 beadsGenerator.getBeadsPosition(9, 3, 3, list_of_points, particle_trans_mat_update);
@@ -277,8 +279,10 @@ int main(int argc, char** argv) {
                 cv::matchTemplate(g_frame_in, expected_bead_pos_image, weight, CV_TM_CCOEFF_NORMED);
                 weight_vec.push_back(weight);
                 ROS_INFO_STREAM("weight" << weight);
-                // particles_set_trans_mat_update.push_back(Eigen::Affine3d particle_trans_mat_update);
+                particles_set_update.push_back(particle_trans_mat_update);
                 // beads_pos_update.push_back();
+                count += 1;
+                ROS_INFO("numbers of iteration %d", count);
             }
 
             // Normalize weight vector to form a probability distribution (i.e. sum to 1).
@@ -286,9 +290,28 @@ int main(int argc, char** argv) {
             {
                 weight_sum += *it;
             }
+            ROS_INFO("after summing");
             for (int i = 0; i < weight_vec.size(); ++i)
             {
                 weight_vec[i] = weight_vec[i] / weight_sum;     
+            }
+            // implement low_variance_sampler
+            double r = getUniformRandomNum(0, 1/N);
+            double c = weight_vec[0].at<double>(0,0); // get the first particle's weight
+            ROS_INFO("fisrt weight %f", c);
+            int indicator = 0;
+            double U =0;
+            double N_inv = 1/N;
+            int np = 0;
+            for (int m = 0; m < N; ++m)
+            {
+                U = r + (m - 1) * N_inv;
+                while (U > c)
+                {
+                    indicator += 1;
+                    c = c + weight_vec[indicator].at<double>(0,0);
+                }
+                particles_set[m] = particles_set_update[indicator];
             }
             
 
@@ -298,9 +321,8 @@ int main(int argc, char** argv) {
         // delta_time = loop_end - loop_begin;
 
         sleep.sleep();
-        loop_end = ros::Time::now().toSec();
-        delta_time = loop_end - loop_begin;
         ros::spinOnce();
+        loop_end = ros::Time::now().toSec();
         // delta_time = loop_end - loop_begin;
     }
 	return 0;
