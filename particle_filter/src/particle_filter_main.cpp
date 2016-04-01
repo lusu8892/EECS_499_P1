@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
     cv::namedWindow( "particle filter", 1 );
 	TransformationGenerator beadsGenerator; // instaniate an object of TransformationGenerator
 
-    ros::Duration sleep(1.0);
+    ros::Duration sleep(0.5);
     // instaniate a camera projection matrix object
     cv_projective::cameraProjectionMatrices cam_proj_mat(nh, std::string("/camera/camera_info"), std::string("/camera/camera_info"));
     cv::Mat P_mat; // define a cv::Mat variable to store projection matrix
@@ -302,15 +302,17 @@ int main(int argc, char** argv) {
                 weight_vec[i] = weight_vec[i] / weight_sum;     
             }
             // implement low_variance_sampler
-            float r = getUniformRandomNum(0, 1/N);
+            float N_inv = (float)1/ float(N);
+            float r = getUniformRandomNum(0, N_inv);
             float c = weight_vec[0]; // get the first particle's weight
             // ROS_INFO("fisrt weight %f", c);
             int indicator = 0;
-            float U =0;
-            float N_inv = 1/N;
+            float U = 0;
+            
             for (int m = 0; m < N; ++m)
             {
-                U = r + (m - 1) * N_inv;
+                U = r + (float)m * N_inv;
+                ROS_INFO("U = %f", U);
                 while (U > c)
                 {
                     indicator += 1;
@@ -326,7 +328,7 @@ int main(int argc, char** argv) {
         // loop_end = ros::Time::now().toSec();
         // delta_time = loop_end - loop_begin;
 
-        sleep.sleep();
+        // sleep.sleep();
         // loop_end = ros::Time::now().toSec();
         // delta_time = loop_end - loop_begin;
         ros::spinOnce();
