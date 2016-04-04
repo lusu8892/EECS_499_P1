@@ -189,7 +189,7 @@ void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, con
     float N_inv = (float)1/ float(N);
     float r = getUniformRandomNum(0, N_inv);
     ROS_INFO("r = %f", r);
-    float c = weight_vec[0]; // get the first particle's weight
+    float c = normd_weight_vec[0]; // get the first particle's weight
     // ROS_INFO("fisrt weight %f", c);
     int indx(0);
     float U(0.0);
@@ -201,7 +201,7 @@ void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, con
         while (U > c)
         {
             indx = indx + 1;
-            c = c + weight_vec[indx];
+            c = c + normd_weight_vec[indx];
             ROS_INFO("indx %d", indx);
         }
         
