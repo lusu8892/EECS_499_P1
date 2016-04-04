@@ -87,7 +87,7 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr_0)(double,
     temp_trans_mat.matrix() = input_trans_mat;
     
     Eigen::Vector3d input_translation = temp_trans_mat.translation();
-    cout << "translation part " << temp_trans_mat.translation() << " " << endl;
+    // cout << "translation part " << temp_trans_mat.translation() << " " << endl;
     Eigen::Quaterniond input_q(temp_trans_mat.linear());
 
     Oe(0)= (*func_ptr_0)(a,b) + input_translation(0);
@@ -152,37 +152,38 @@ void imageCallback(const sensor_msgs::ImageConstPtr& segemented_image)
 
 void addNoiseToImage(cv::Mat& input_image)
 {
-    // imGray is the grayscale of the input image
-    cv::Mat noise = Mat(input_image.size(),CV_8UC1);
+    
+    cv::Mat noise(input_image.size(),CV_8UC1);
     // normalize(imGray, result, 0.0, 1.0, CV_MINMAX, CV_64F);
     cv::randn(noise, 0, 0.05);
     input_image = input_image + cv::abs(noise);
-    cv::normalize(input_image, input_image, 0.0, 1.0, CV_MINMAX, CV_8UC1);
+    // cv::normalize(input_image, input_image, 0.0, 1.0, CV_MINMAX, CV_8UC1);
     // cv::imshow("OUTPUT",input_image);
 }
 
 void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, const vector<float>&  weight_vec,
                         vector<Eigen::Affine3d>& particles_set)
 {   
-    float weight_sum;
+    float weight_sum(0.0);
+    vector<float> normd_weight_vec(weight_vec.size());
     // ROS_INFO("numbers of particle updated %d", (int)particles_set_update.size());
     // Normalize weight vector to form a probability distribution (i.e. sum to 1).
-    for(vector<float>::iterator it = weight_vec.begin(); it < weight_vec.end(); ++it)
-    {
-        weight_sum += *it;
-    }
-    // ROS_INFO_STREAM("weight_vec size = " << weight_vec.size());
     for (int i = 0; i < weight_vec.size(); ++i)
     {
-        weight_vec[i] = weight_vec[i] / weight_sum;     
+        weight_sum += weight_vec[i];
+    }
+    // ROS_INFO_STREAM("weight_vec size = " << weight_vec.size());
+    for (int i = 0; i < normd_weight_vec.size(); ++i)
+    {
+        normd_weight_vec[i] = weight_vec[i] / weight_sum;     
     }
 
-    weight_sum = 0; // set wet sum to zero
-    for (vector<float>::iterator it = weight_vec.begin(); it < weight_vec.end(); ++it)
-    {
-        weight_sum += *it;
-    }
-    ROS_INFO_STREAM("normalized weight sum = " << weight_sum);
+    // weight_sum = 0; // set wet sum to zero
+    // for (vector<float>::iterator it = normd_weight_vec.begin(); it < normd_weight_vec.end(); ++it)
+    // {
+    //     weight_sum += *it;
+    // }
+    // ROS_INFO_STREAM("normalized weight sum = " << weight_sum);
 
     // implement low_variance_sampler
     float N_inv = (float)1/ float(N);
@@ -271,7 +272,7 @@ int main(int argc, char** argv) {
     vector<Eigen::Affine3d> particles_set_update;
     vector<transformation_generator::ListOfPoints> beads_pos_update;
     vector<float>  weight_vec;
-    float weight_sum;
+    // float weight_sum;
     
     // double delta_time = 0.02;
     double loop_begin(ros::Time::now().toSec()); // set a time for recording the start time of each iteration
@@ -300,7 +301,7 @@ int main(int argc, char** argv) {
 
             g_new_image = false;
 
-            int count = 0;
+            // int count = 0;
             loop_begin = ros::Time::now().toSec();
             ROS_INFO("delta_time = %f", delta_time);
             // begin = ros::Time::now().toSec();
@@ -327,19 +328,21 @@ int main(int argc, char** argv) {
                 cv::Mat weight;
                 weight *= 0;
 
+                int count(0); // the counter counting number of times failing to draw beads
                 // for 9 beads;
                 for (int k = 0; k < npts; ++k)
                 {   
-                    int count(0); // the counter counting number of times failing to draw beads
+                    // int count(0); // the counter counting number of times failing to draw beads
                     // ROS_INFO("start to draw each bead at one time");
                     // convert ros geomertry/points to cv::Point3d
-                    cv:: bead_i_pos(list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
+                    cv::Point3d bead_i_pos(list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
                     // ROS_INFO("bead center <%f, %f, %f>", list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
 
                     // ROS_INFO("start to render sphere");
                     if (bead_i_pos.z < 0)
                     {
                         count += 1;
+                        expected_bead_pos_image *= 1;
                     }
                     else
                     {
@@ -354,24 +357,26 @@ int main(int argc, char** argv) {
                 {
                     expected_bead_pos_image *= 0;
                     addNoiseToImage(expected_bead_pos_image);
+                    // ROS_INFO("adding noise to blank image");
                 }
                 else
                 {
                     addNoiseToImage(expected_bead_pos_image);
+                    // ROS_INFO("adding noise to good image");
                 }
 
                 cv::addWeighted(expected_bead_pos_image, 0.7, g_frame_in, 0.3, 0.0, blended_image);
                 cv::imshow("particle filter", blended_image);
-                cv::waitKey(5);
+                cv::waitKey(10);
                 cv::matchTemplate(g_frame_in, expected_bead_pos_image, weight, CV_TM_CCOEFF_NORMED);
                 weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
                 // ROS_INFO_STREAM("weight =" << weight.at<float>(0,0));
                 particles_set_update.push_back(particle_trans_mat_update);
                 // beads_pos_update.push_back();
-                count += 1;
+                // count += 1;
                 // ROS_INFO("numbers of particle generated = %d", count);
             }
-            lowVarianceSampler(particles_set, particles_set_update);
+            lowVarianceSampler(particles_set_update, weight_vec, particles_set);
             // cout << "indx = " << indx << endl;
             ROS_INFO("particle set size = %d", (int)particles_set.size());
             // loop_end = ros::Time::now().toSec();
