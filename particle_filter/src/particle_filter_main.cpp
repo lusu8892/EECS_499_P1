@@ -87,6 +87,7 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr_0)(double,
     temp_trans_mat.matrix() = input_trans_mat;
     
     Eigen::Vector3d input_translation = temp_trans_mat.translation();
+    cout << "translation part " << temp_trans_mat.translation() << " " << endl;
     Eigen::Quaterniond input_q(temp_trans_mat.linear());
 
     Oe(0)= (*func_ptr_0)(a,b) + input_translation(0);
@@ -265,6 +266,7 @@ int main(int argc, char** argv) {
                 
                 // define the expected beads image mat for each particle
                 cv::Mat weight;
+                weight *= 0;
 
                 // for 9 beads;
                 for (int k = 0; k < npts; ++k)
@@ -282,6 +284,8 @@ int main(int argc, char** argv) {
                     // imshow("Black Beads", bead_i_rendered);
                 }
                 // ROS_INFO("finish beads drawing for one particle");
+                expected_bead_pos_image + noise
+
                 cv::addWeighted(expected_bead_pos_image, 0.7, g_frame_in, 0.3, 0.0, blended_image);
                 cv::imshow("particle filter", blended_image);
                 cv::waitKey(5);
@@ -318,7 +322,7 @@ int main(int argc, char** argv) {
             ROS_INFO("r = %f", r);
             float c = weight_vec[0]; // get the first particle's weight
             // ROS_INFO("fisrt weight %f", c);
-            int indicator = 0;
+            int indx = 0;
             float U = 0;
             particles_set.clear();
             for (int m = 0; m < N; ++m)
@@ -327,23 +331,15 @@ int main(int argc, char** argv) {
                 // ROS_INFO("U = %f", U);
                 while (U > c)
                 {
-                    indicator = indicator + 1;
-                    // if (indicator > N)
-                    // {
-                    //     break;
-                    // }
-                    // else
-                    // {
-                    //     c = c + weight_vec[indicator];
-                    // }
-                    c = c + weight_vec[indicator];
-                    // ROS_INFO("indicator %d", indicator);
+                    indx = indx + 1;
+                    c = c + weight_vec[indx];
+                    ROS_INFO("indx %d", indx);
                 }
                 
-                particles_set.push_back(particles_set_update[indicator]);
-                // ROS_INFO_STREAM("mat \n" << particles_set_update[indicator].matrix());
+                particles_set.push_back(particles_set_update[indx]);
+                // ROS_INFO_STREAM("mat \n" << particles_set_update[indx].matrix());
             }
-            cout << "indicator = " << indicator << endl;
+            // cout << "indx = " << indx << endl;
             ROS_INFO("particle set size = %d", (int)particles_set.size());
             // loop_end = ros::Time::now().toSec();
             loop_end = ros::Time::now().toSec();

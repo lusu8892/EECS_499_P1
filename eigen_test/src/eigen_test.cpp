@@ -174,11 +174,24 @@ int main(int argc, char **argv) {
 
     // initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
 
-    Matrix3d M_1; Matrix3d M_2;
-    M_1 << 1,3,4,5,6,3,1,3,4;
-    M_2 << 3,2,1,4,6,7,9,1,2;
+    Eigen::Vector3d vec;
+    vec << 1,2,3;
 
-    cout << M_1 * M_2 << endl;
-    cout << M_2 * M_1 << endl;
+    // cout << M_1 * M_2 << endl;
+    Eigen::Quaterniond q;
+    Eigen::Quaterniond q_no;
+    q.x() = 0.1;
+    q.y() = 0.2;
+    q.z() = 0.3;
+    q.w() = 2;
+    q_no = q.normalized();
+
+    // MatrixBase::normalize(q);
+    cout << q_no.x() <<" " << q_no.y() << " " << q_no.z() << " "<< q_no.w() << endl;
+
+    double sum = q_no.x() * q_no.x() + q_no.y() * q_no.y() + q_no.z() * q_no.z() + q_no.w() * q_no.w();
+    cout << sum << endl; 
+    cout << q.x() <<" " << q.y() << " " << q.z() << " "<< q.w() << endl;
+
     return 0;
 }

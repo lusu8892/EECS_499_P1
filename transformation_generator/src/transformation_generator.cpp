@@ -62,6 +62,9 @@ Eigen::Affine3d TransformationGenerator::getNewTransformationMatrix(const Eigen:
     Eigen::Affine3d expo_mat = getExpoMatrix(old_trans_mat, delta_time);
 
     new_trans_mat = expo_mat * old_trans_mat;
+
+    // ROS_INFO_STREAM("exponential matrix \n" << expo_mat.matrix());
+
     return new_trans_mat;
 }
 
