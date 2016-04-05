@@ -20,7 +20,7 @@
 #include <cwru_opencv_common/projective_geometry.h>
 
 const double PI = 3.14159265359;
-const int N = 100; // The number of particles the system generates
+const int N = 1000; // The number of particles the system generates
 const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
 const double RADIUS = 0.0082/2;
 
@@ -150,6 +150,34 @@ void imageCallback(const sensor_msgs::ImageConstPtr& segemented_image)
     }
 }
 
+void particlesGeneration(vector<Eigen::Affine3d>& particles_set)
+{   
+    // particles_set.clear();
+    Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getGaussianRandomNum, 
+                                    getGaussianRandomNum, "no", -0.05, 0.05, -0.05, 0.05, 0.4, 0.6, 0, 0, 0, 0);
+    
+    initial_state.linear()(0,0) = -1; initial_state.linear()(2,2) = -1;
+
+    // ROS_INFO_STREAM("initial state rotation part \n" << initial_state.linear());
+
+    Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getUniformRandomNum, 
+                                getUniformRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, Eigen::Vector3d(0,0,1));
+
+    double theta = getUniformRandomNum(0, 2*PI);
+    Eigen::Vector3d rot_axis(cos(theta), sin(theta), 0);
+    
+    Eigen::Affine3d rot_mat_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 
+                            getGaussianRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 15/180, 0, 0, rot_axis);
+
+    // paticle filter starts from there
+    initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
+
+    // // convert Eigen::Affine3d transformation matrix to flat 4-by-4 Eigen::Matrix4d type
+    // Eigen::Matrix4d initial_state_mat = initial_state.matrix();
+    // ROS_INFO_STREAM("initial state mat \n" << initial_state.matrix());
+    particles_set.push_back(initial_state);
+}
+
 void addNoiseToImage(cv::Mat& input_image)
 {
     
@@ -157,8 +185,10 @@ void addNoiseToImage(cv::Mat& input_image)
     // normalize(imGray, result, 0.0, 1.0, CV_MINMAX, CV_64F);
     cv::randn(noise, 0, 0.05);
     input_image = input_image + cv::abs(noise);
-    // cv::normalize(input_image, input_image, 0.0, 1.0, CV_MINMAX, CV_8UC1);
+    // cv::normalize(input_image, input_image, 1.0, 0.0, CV_MINMAX, CV_8UC1);
     // cv::imshow("OUTPUT",input_image);
+    
+    // cv::waitKey(10);
 }
 
 void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, const vector<float>&  weight_vec,
@@ -166,29 +196,24 @@ void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, con
 {   
     float weight_sum(0.0);
     vector<float> normd_weight_vec(weight_vec.size());
-    // ROS_INFO("numbers of particle updated %d", (int)particles_set_update.size());
     // Normalize weight vector to form a probability distribution (i.e. sum to 1).
     for (int i = 0; i < weight_vec.size(); ++i)
     {
+        
         weight_sum += weight_vec[i];
     }
     // ROS_INFO_STREAM("weight_vec size = " << weight_vec.size());
     for (int i = 0; i < normd_weight_vec.size(); ++i)
     {
-        normd_weight_vec[i] = weight_vec[i] / weight_sum;     
-    }
+        normd_weight_vec[i] = weight_vec[i] / weight_sum;
+        ROS_INFO("normalized weight %f", normd_weight_vec[i]);
 
-    // weight_sum = 0; // set wet sum to zero
-    // for (vector<float>::iterator it = normd_weight_vec.begin(); it < normd_weight_vec.end(); ++it)
-    // {
-    //     weight_sum += *it;
-    // }
-    // ROS_INFO_STREAM("normalized weight sum = " << weight_sum);
+    }
 
     // implement low_variance_sampler
     float N_inv = (float)1/ float(N);
     float r = getUniformRandomNum(0, N_inv);
-    ROS_INFO("r = %f", r);
+    // ROS_INFO("r = %f", r);
     float c = normd_weight_vec[0]; // get the first particle's weight
     // ROS_INFO("fisrt weight %f", c);
     int indx(0);
@@ -202,13 +227,15 @@ void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, con
         {
             indx = indx + 1;
             c = c + normd_weight_vec[indx];
-            ROS_INFO("indx %d", indx);
+            // ROS_INFO("indx %d", indx);
         }
-        
+        ROS_INFO("No. particle to be chosen %d", indx);
         particles_set.push_back(particles_set_update[indx]);
         // ROS_INFO_STREAM("mat \n" << particles_set_update[indx].matrix());
     }
 }
+
+
 
 int main(int argc, char** argv) {
 	ros::init(argc, argv, "particle_filter_implemetation"); //node name
@@ -233,40 +260,17 @@ int main(int argc, char** argv) {
 
 	srand(time(NULL)); // random number seed;
 
-    Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getUniformRandomNum, 
-                                    getUniformRandomNum, "no", -0.3, 0.3, -0.2, 0.2, 0.3, 0.8, 0, 0,0,0);
-    
-    initial_state.linear()(0,0) = -1; initial_state.linear()(2,2) = -1;
-
-    ROS_INFO_STREAM("initial state rotation part \n" << initial_state.linear());
-
-    Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getUniformRandomNum, 
-                                getUniformRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, Eigen::Vector3d(0,0,1));
-
-    double theta = getUniformRandomNum(0, 2*PI);
-    Eigen::Vector3d rot_axis(cos(theta), sin(theta), 0);
-    
-    Eigen::Affine3d rot_mat_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 
-                            getGaussianRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 10/180, 0, 0, rot_axis);
-
-    // paticle filter starts from there
-    initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
-
-    // convert Eigen::Affine3d transformation matrix to flat 4-by-4 Eigen::Matrix4d type
-    Eigen::Matrix4d initial_state_mat = initial_state.matrix();
-    ROS_INFO_STREAM("initial state mat \n" << initial_state.matrix());
-
     // make the randomly generated particles from the initial prior gaussian distribution
     // each partical is a transformation matrix from body frame to camera frame
     vector<Eigen::Affine3d> particles_set;
     for (int i = 0; i < N; ++i)
     {
-        Eigen::Affine3d partical_trans_mat;
-        partical_trans_mat = randomTransformationMatrixGenerator(getUniformRandomNum, 
-                getGaussianRandomNum, "quaternion", -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.1, 0.1, 0.9, 1, Eigen::Vector3d(0,0,0), initial_state_mat);
-        particles_set.push_back(partical_trans_mat);
-        // ROS_INFO_STREAM("partical initial trans mat \n" << partical_trans_mat.matrix());
-
+        particlesGeneration(particles_set);
+        // Eigen::Affine3d partical_trans_mat;
+        // partical_trans_mat = randomTransformationMatrixGenerator(getUniformRandomNum, 
+        //         getGaussianRandomNum, "quaternion", -0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.1, 0.1, 0.9, 1, Eigen::Vector3d(0,0,0), initial_state_mat);
+        // particles_set.push_back(partical_trans_mat);
+        // // ROS_INFO_STREAM("partical initial trans mat \n" << partical_trans_mat.matrix());
     }
 
     vector<Eigen::Affine3d> particles_set_update;
