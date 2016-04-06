@@ -206,7 +206,7 @@ void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, con
     for (int i = 0; i < normd_weight_vec.size(); ++i)
     {
         normd_weight_vec[i] = weight_vec[i] / weight_sum;
-        ROS_INFO("normalized weight %f", normd_weight_vec[i]);
+        ROS_INFO("Paritcle No. %d, normalized weight %f", i, normd_weight_vec[i]);
 
     }
 

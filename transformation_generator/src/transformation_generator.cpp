@@ -4,6 +4,7 @@
 #include <transformation_generator/transformation_generator.h>
 
 const double BEADS_SEPERATION_VALUE = 0.0254;
+const double PI = 3.14159265359;
 
 // Constructor
 // TransformationGenerator::TransformationGenerator(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
@@ -55,11 +56,12 @@ void TransformationGenerator::getBeadsPosition(int beads_number, int row_num, in
 //  // note: COULD make minimal_publisher_ a public member function, if want to use it within "main()"
 // }
 
-Eigen::Affine3d TransformationGenerator::getNewTransformationMatrix(const Eigen::Affine3d& old_trans_mat, double delta_time)
+Eigen::Affine3d TransformationGenerator::getNewTransformationMatrix(const Eigen::Affine3d& old_trans_mat, 
+                                                    const std::string flag, double delta_time)
 {
     Eigen::Affine3d new_trans_mat;
 
-    Eigen::Affine3d expo_mat = getExpoMatrix(old_trans_mat, delta_time);
+    Eigen::Affine3d expo_mat = getExpoMatrix(old_trans_mat, flag, delta_time);
 
     new_trans_mat = expo_mat * old_trans_mat;
 
@@ -105,26 +107,45 @@ Eigen::Affine3d TransformationGenerator::getNewTransformationMatrix(const Eigen:
 //     return gaussian_num;
 // }
 
-Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& trans_mat, double delta_time)
+// flag: body velocity or hybrid velocity
+Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& trans_mat, const std::string& flag, double delta_time)
 {
-    Eigen::Affine3d expo_mat;
-    Eigen::Vector3d rot_omega;
-    Eigen::Vector3d trans_velo;
     Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);; // 3-by-3 identity matrix
+    Eigen::Affine3d expo_mat;
+    Eigen::Vector3d trans_velo;
+    Eigen::Vector3d rot_omega;
 
     Eigen::Matrix3d skew_trans_mat = getSkewSymMatrix(trans_mat.translation());
 
-    velo_vec::velocityVector rand_body_velo;
-    velo_vec::velocityVector rand_space_velo; // define a random space velocity
-    randomBodyVelocityGenerator(rand_body_velo); // initialize it by 
+    if (flag == "body")
+    {
+        velo_vec::velocityVector rand_body_velo;
+        randomBodyVelocityGenerator(rand_body_velo); // initialize it by 
 
-    // convert rand_body_velocity to spatial velocity
-    rand_space_velo.transV = trans_mat.linear() * rand_body_velo.transV + skew_trans_mat * trans_mat.linear() * rand_body_velo.angV;
-    rand_space_velo.angV = trans_mat.linear() * rand_body_velo.angV;
+        velo_vec::velocityVector rand_space_velo; // define a random space velocity 
 
-    rot_omega = delta_time * rand_space_velo.transV;
-    trans_velo = delta_time * rand_space_velo.angV;
+        // convert rand_body_velocity to spatial velocity
+        rand_space_velo.transV = trans_mat.linear() * rand_body_velo.transV + skew_trans_mat * trans_mat.linear() * rand_body_velo.angV;
+        rand_space_velo.angV = trans_mat.linear() * rand_body_velo.angV;
 
+        rot_omega = delta_time * rand_space_velo.transV;
+        trans_velo = delta_time * rand_space_velo.angV;
+    }
+    else if (flag == "hybrid")
+    {   
+        velo_vec::velocityVector fixed_hybrid_velo;
+        hybridVelocityGenerator(fixed_hybrid_velo);
+
+        velo_vec::velocityVector fixed_space_velo; // define a fixed space velocity
+
+        // convert rand_body_velocity to spatial velocity
+        fixed_space_velo.transV = EYE_3 * fixed_hybrid_velo.transV + skew_trans_mat * EYE_3 * fixed_hybrid_velo.angV;
+        fixed_space_velo.angV = EYE_3 * fixed_hybrid_velo.angV;
+
+        rot_omega = delta_time * fixed_space_velo.transV;
+        trans_velo = delta_time * fixed_space_velo.angV;
+    }
+    
     // if rot_omega near to zero then assume the expo_mat linear part is 3-by-3 identity matrix
     if (rot_omega.norm() < 10e-5)
     {
@@ -181,6 +202,16 @@ void TransformationGenerator::randomBodyVelocityGenerator(velo_vec::velocityVect
 
     rand_body_velo.transV = trans_velo;
     rand_body_velo.angV = rot_omega;
+}
+
+void TransformationGenerator::hybridVelocityGenerator(velo_vec::velocityVector& hybrid_velo)
+{   
+
+    Eigen::Vector3d trans_velo(1, 1, 1);
+    Eigen::Vector3d rot_omega(0, 0, 0);
+
+    hybrid_velo.transV = trans_velo;
+    hybrid_velo.angV = rot_omega;
 }
 
 double TransformationGenerator::gaussRandNumGenerator(double mean, double deviation)

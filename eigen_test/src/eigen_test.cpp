@@ -9,6 +9,9 @@
 #include <math.h>
 #include <iostream>
 
+#include <transformation_generator/transformation_generator.h>
+
+
 const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
 const double PI = 3.14159265359/2;
 const int N = 1000; // The number of particles the system generates
@@ -174,24 +177,26 @@ int main(int argc, char **argv) {
 
     // initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
 
-    Eigen::Vector3d vec;
-    vec << 1,2,3;
+    // Eigen::Vector3d vec;
+    // vec << 1,2,3;
 
-    // cout << M_1 * M_2 << endl;
-    Eigen::Quaterniond q;
-    Eigen::Quaterniond q_no;
-    q.x() = 0.1;
-    q.y() = 0.2;
-    q.z() = 0.3;
-    q.w() = 2;
-    q_no = q.normalized();
+    // // cout << M_1 * M_2 << endl;
+    // Eigen::Quaterniond q;
+    // Eigen::Quaterniond q_no;
+    // q.x() = 0.1;
+    // q.y() = 0.2;
+    // q.z() = 0.3;
+    // q.w() = 2;
+    // q_no = q.normalized();
 
-    // MatrixBase::normalize(q);
-    cout << q_no.x() <<" " << q_no.y() << " " << q_no.z() << " "<< q_no.w() << endl;
+    // // MatrixBase::normalize(q);
+    // cout << q_no.x() <<" " << q_no.y() << " " << q_no.z() << " "<< q_no.w() << endl;
 
-    double sum = q_no.x() * q_no.x() + q_no.y() * q_no.y() + q_no.z() * q_no.z() + q_no.w() * q_no.w();
-    cout << sum << endl; 
-    cout << q.x() <<" " << q.y() << " " << q.z() << " "<< q.w() << endl;
+    // double sum = q_no.x() * q_no.x() + q_no.y() * q_no.y() + q_no.z() * q_no.z() + q_no.w() * q_no.w();
+    // cout << sum << endl; 
+    // cout << q.x() <<" " << q.y() << " " << q.z() << " "<< q.w() << endl;
+
+    velo_vec::velocityVector hybrid(Eigen::Vector3d(1,1,1), Eigen::Vector3d(0,0,0));
 
     return 0;
 }

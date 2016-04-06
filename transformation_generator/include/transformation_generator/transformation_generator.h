@@ -30,7 +30,7 @@ namespace velo_vec
     	Eigen::Vector3d transV; // translational velocity part
         Eigen::Vector3d angV; // angular velocity part
         // constructor
-        velocityVector(Eigen::Vector3d transV_ = Eigen::Vector3d(1, 2, 3), Eigen::Vector3d angV_ = Eigen::Vector3d(1, 2, 3)):
+        velocityVector(Eigen::Vector3d transV_ = Eigen::Vector3d(1, 2, 3), Eigen::Vector3d angV_ = Eigen::Vector3d(0, 0, 0)):
         transV(transV_),
         angV(angV_)
         {
@@ -52,7 +52,7 @@ public:
         	const Eigen::Affine3d& trans_mat);
 
 	// A function gives new transformation matrix based on old one
-    Eigen::Affine3d getNewTransformationMatrix(const Eigen::Affine3d& old_trans_mat, double delta_time);
+    Eigen::Affine3d getNewTransformationMatrix(const Eigen::Affine3d& old_trans_mat, const std::string flag, double delta_time);
 
     // // A function randomly generate transformation matrix
     // Eigen::Affine3d randomTransformationMatrixGenerator();
@@ -73,13 +73,16 @@ private:
     // double gaussianNumberGenerator(double LO, double HI);
 
     // A funtion generate a Exponential Matrix based on random body velocity
-    Eigen::Affine3d getExpoMatrix(const Eigen::Affine3d& trans_mat, double delta_time);
+    Eigen::Affine3d getExpoMatrix(const Eigen::Affine3d& trans_mat, const std::string& flage, double delta_time);
 
     // A function to convert vector to skew-symmetric matrix
     Eigen::Matrix3d getSkewSymMatrix(const Eigen::Vector3d& vector_in);
 
     // A funtion which generate gaussian distributed body velocity
     void randomBodyVelocityGenerator(velo_vec::velocityVector& rand_body_velo);
+
+    // A funtion generate specified hybrid velocity
+    void hybridVelocityGenerator(velo_vec::velocityVector& hybrid_velo);
 
     // A funtion which return a double type gaussian distributed random number
     double gaussRandNumGenerator(double mean, double deviation);

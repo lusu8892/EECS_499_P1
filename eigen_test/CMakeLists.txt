@@ -7,6 +7,7 @@ project(eigen_test)
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   roscpp
+  transformation_generator
 )
 
 find_package(cmake_modules REQUIRED)
