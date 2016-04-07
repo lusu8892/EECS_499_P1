@@ -103,16 +103,8 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr_0)(double,
         q_perturbation.y() = (*func_ptr_1)(g,h);
         q_perturbation.z() = (*func_ptr_1)(g,h);
         q_perturbation.w() = (*func_ptr_0)(i,j);
-        // Eigen::Quaterniond<Scalar> 
-        // double magnitude;
-        // q.x() = (*func_ptr_1)(g,h) + input_q.x();
-        // q.y() = (*func_ptr_1)(g,h) + input_q.y();
-        // q.z() = (*func_ptr_1)(g,h) + input_q.z();
-        // q.w() = (*func_ptr_1)(g,h) + input_q.w();
         q = q_perturbation.normalized() * input_q.normalized();
         Re = q.normalized().toRotationMatrix();
-        // Eigen::Matrix3d Re(q.normalized()); //convenient conversion...initialize a 3x3 orientation matrix
-        // using a quaternion, q
         random_trans_mat.linear() = Re; // the rotational part of affine is the "linear" part
     }
     else if (flag == "arbitrary")
@@ -154,20 +146,20 @@ void particlesGeneration(vector<Eigen::Affine3d>& particles_set)
 {   
     // particles_set.clear();
     Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getGaussianRandomNum, 
-                                    getGaussianRandomNum, "no", -0.05, 0.05, -0.05, 0.05, 0.4, 0.6, 0, 0, 0, 0);
+                                    getGaussianRandomNum, "no", 0, 0, 0, 0, 0.4, 0.4, 0, 0, 0, 0);
     
     initial_state.linear()(0,0) = -1; initial_state.linear()(2,2) = -1;
 
     // ROS_INFO_STREAM("initial state rotation part \n" << initial_state.linear());
 
     Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getUniformRandomNum, 
-                                getUniformRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, Eigen::Vector3d(0,0,1));
+                                getUniformRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, Eigen::Vector3d(0,0,1));
 
-    double theta = getUniformRandomNum(0, 2*PI);
+    double theta = getUniformRandomNum(0, 0.1*PI);
     Eigen::Vector3d rot_axis(cos(theta), sin(theta), 0);
     
     Eigen::Affine3d rot_mat_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 
-                            getGaussianRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 15/180, 0, 0, rot_axis);
+                            getGaussianRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 10/180, 0, 0, rot_axis);
 
     // paticle filter starts from there
     initial_state.linear() = rot_mat_a.linear() * rot_mat_z.linear() * initial_state.linear();
@@ -184,7 +176,7 @@ void addNoiseToImage(cv::Mat& input_image)
     cv::Mat noise(input_image.size(),CV_8UC1);
     // normalize(imGray, result, 0.0, 1.0, CV_MINMAX, CV_64F);
     cv::randn(noise, 0, 0.05);
-    input_image = input_image + cv::abs(noise);
+    input_image = cv::abs(input_image + noise);
     // cv::normalize(input_image, input_image, 1.0, 0.0, CV_MINMAX, CV_8UC1);
     // cv::imshow("OUTPUT",input_image);
     
@@ -206,7 +198,7 @@ void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, con
     for (int i = 0; i < normd_weight_vec.size(); ++i)
     {
         normd_weight_vec[i] = weight_vec[i] / weight_sum;
-        ROS_INFO("Paritcle No. %d, normalized weight %f", i, normd_weight_vec[i]);
+        // ROS_INFO("Paritcle No. %d, normalized weight %f", i, normd_weight_vec[i]);
 
     }
 
@@ -229,13 +221,57 @@ void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, con
             c = c + normd_weight_vec[indx];
             // ROS_INFO("indx %d", indx);
         }
-        ROS_INFO("No. particle to be chosen %d", indx);
+        // ROS_INFO("No. particle to be chosen %d", indx);
         particles_set.push_back(particles_set_update[indx]);
         // ROS_INFO_STREAM("mat \n" << particles_set_update[indx].matrix());
     }
 }
 
+cv::Mat drawBeads(const transformation_generator::ListOfPoints& list_of_points, const cv::Mat& projection_matrix)
+{
+    int npts = list_of_points.points.size();
 
+    // define the expected beads image mat for each particle
+    cv::Mat image_beads(100, 100, CV_8UC1);
+    image_beads *= 0;
+    int count(0); // the counter counting number of times failing to draw beads
+    // for 9 beads;
+    for (int k = 0; k < npts; ++k)
+    {   
+        // int count(0); // the counter counting number of times failing to draw beads
+        // ROS_INFO("start to draw each bead at one time");
+        // convert ros geomertry/points to cv::Point3d
+        cv::Point3d bead_i_pos(list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
+        // ROS_INFO("bead center <%f, %f, %f>", list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
+
+        // ROS_INFO("start to render sphere");
+        if (bead_i_pos.z < 0)
+        {
+            count += 1;
+            image_beads *= 1;
+        }
+        else
+        {
+            cv::Rect bead_i_rendered = cv_3d::renderSphere(image_beads, cv_3d::sphere(bead_i_pos, RADIUS), projection_matrix);    
+        }
+
+        // ROS_INFO("one bead drawn");
+        // imshow("Black Beads", bead_i_rendered);
+    }
+    // if count equals to number of beads so the expected image will be left just as blank with white noise.
+    if (count == npts)
+    {
+        image_beads *= 0;
+        addNoiseToImage(image_beads);
+        // ROS_INFO("adding noise to blank image");
+    }
+    else
+    {
+        addNoiseToImage(image_beads);
+        // ROS_INFO("adding noise to good image");
+    }
+    return image_beads;
+}
 
 int main(int argc, char** argv) {
 	ros::init(argc, argv, "particle_filter_implemetation"); //node name
@@ -257,12 +293,21 @@ int main(int argc, char** argv) {
 
     // instaniate an variable of message of transformation_generator::ListOfPoints
 	transformation_generator::ListOfPoints list_of_points;
+    transformation_generator::ListOfPoints ob_list_of_points;
 
 	srand(time(NULL)); // random number seed;
 
     // make the randomly generated particles from the initial prior gaussian distribution
     // each partical is a transformation matrix from body frame to camera frame
     vector<Eigen::Affine3d> particles_set;
+
+    vector<double> time_vec;
+    for (int i = 0; i < 100; ++i)
+    {
+        double time_increment = i * 1; // time increment is 1 second
+        time_vec.push_back(time_increment);
+    }
+
     for (int i = 0; i < N; ++i)
     {
         particlesGeneration(particles_set);
@@ -284,117 +329,191 @@ int main(int argc, char** argv) {
 
     double delta_time(0.0);
 
+    Eigen::Affine3d observed_trans;
+    observed_trans.matrix() = Eigen::MatrixXd::Identity(4,4);
+    observed_trans.linear()(0,0) = -1; observed_trans.linear()(2,2) = -1;
+    observed_trans.translation() << 0,0,0.4;
+
     // ROS_INFO("delta_time = %f", delta_time);
+    for(int j = 0; j < time_vec.size() - 1; ++j)
+    {
+        delta_time = time_vec[j+1] - time_vec[j];
+        P_mat = cam_proj_mat.getLeftProjectionMatrix();
 
-	while(ros::ok())
-	{   
-        // ros::console::shutdown();
-        // loop_begin = ros::Time::now().toSec();
-        // // delta_time = loop_end - loop_begin;
-        // ROS_INFO("delta_time = %f", delta_time);
+        particles_set_update.clear();
+        beads_pos_update.clear();
+        weight_vec.clear();
 
-        if (g_new_image) // if a new image is available, process it.
+        // cv::Mat oberved_beads_image(100, 100, CV_8UC1);
+        Eigen::Affine3d observed_trans_updated = beadsGenerator.getNewTransformationMatrix(observed_trans, "hybrid", delta_time);
+        ROS_INFO_STREAM("updated observed transformation matrix \n" << observed_trans_updated.matrix() << "\n");
+
+        beadsGenerator.getBeadsPosition(9, 3, 3, ob_list_of_points, observed_trans_updated);
+        cv::Mat oberved_beads_image = drawBeads(ob_list_of_points, P_mat);
+
+        // for each particle
+        for (int i = 0; i < N; ++i)
         {
+            // get one new particle from last step
+            Eigen::Affine3d particle_trans_mat_update = beadsGenerator.getNewTransformationMatrix(particles_set[i], "body", delta_time);
+            // ROS_INFO_STREAM("updated particle trans mat \n" << particle_trans_mat_update.matrix());
+            // generate 9 beads position in camera frame
+            beadsGenerator.getBeadsPosition(9, 3, 3, list_of_points, particle_trans_mat_update);
+            // ROS_INFO_STREAM("beads position generated");
+            // beads_pos_update[i] = list_of_points;
             
-            P_mat = cam_proj_mat.getLeftProjectionMatrix();
-
-            particles_set_update.clear();
-            beads_pos_update.clear();
-            weight_vec.clear();
-            // weight_sum.release(); // clear weight_sum;
-
-            g_new_image = false;
-
-            // int count = 0;
-            loop_begin = ros::Time::now().toSec();
-            ROS_INFO("delta_time = %f", delta_time);
-            // begin = ros::Time::now().toSec();
-            // for each particle
-            for (int i = 0; i < N; ++i)
+            // define the expected beads image mat for each particle
+            cv::Mat expected_beads_image = drawBeads(list_of_points, P_mat);
+            for (int ij = 0; ij < 100; ++ij)
             {
-                // get one new particle from last step
-                Eigen::Affine3d particle_trans_mat_update = beadsGenerator.getNewTransformationMatrix(particles_set[i], delta_time);
-                // ROS_INFO_STREAM("updated particle trans mat \n" << particle_trans_mat_update.matrix());
-                // generate 9 beads position in camera frame
-                beadsGenerator.getBeadsPosition(9, 3, 3, list_of_points, particle_trans_mat_update);
-                // ROS_INFO_STREAM("beads position generated");
-                // beads_pos_update[i] = list_of_points;
-                int npts = list_of_points.points.size();
-
-                // define the expected beads image mat for each particle
-                cv::Mat expected_bead_pos_image(g_frame_in.size(), CV_8UC1);
-                expected_bead_pos_image *= 0;
-                
-                // define a mat to store the two expected and observed image
-                cv::Mat blended_image(g_frame_in.size(), CV_8UC1);
-                
-                // define the expected beads image mat for each particle
-                cv::Mat weight;
-                weight *= 0;
-
-                int count(0); // the counter counting number of times failing to draw beads
-                // for 9 beads;
-                for (int k = 0; k < npts; ++k)
-                {   
-                    // int count(0); // the counter counting number of times failing to draw beads
-                    // ROS_INFO("start to draw each bead at one time");
-                    // convert ros geomertry/points to cv::Point3d
-                    cv::Point3d bead_i_pos(list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
-                    // ROS_INFO("bead center <%f, %f, %f>", list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
-
-                    // ROS_INFO("start to render sphere");
-                    if (bead_i_pos.z < 0)
-                    {
-                        count += 1;
-                        expected_bead_pos_image *= 1;
-                    }
-                    else
-                    {
-                        cv::Rect bead_i_rendered = cv_3d::renderSphere(expected_bead_pos_image, cv_3d::sphere(bead_i_pos, RADIUS), P_mat);    
-                    }
-
-                    // ROS_INFO("one bead drawn");
-                    // imshow("Black Beads", bead_i_rendered);
-                }
-                // if count equals to number of beads so the expected image will be left just as blank with white noise.
-                if (count == npts)
+                for (int ik= 0; ik < 100; ++ik)
                 {
-                    expected_bead_pos_image *= 0;
-                    addNoiseToImage(expected_bead_pos_image);
-                    // ROS_INFO("adding noise to blank image");
+                    if (expected_beads_image.at<int>(ij, ik) > 0)
+                    {
+                        cout << expected_beads_image.at<int>(ij, ik) << endl;    
+                    }
+                        
                 }
-                else
-                {
-                    addNoiseToImage(expected_bead_pos_image);
-                    // ROS_INFO("adding noise to good image");
-                }
-
-                cv::addWeighted(expected_bead_pos_image, 0.7, g_frame_in, 0.3, 0.0, blended_image);
-                cv::imshow("particle filter", blended_image);
-                cv::waitKey(10);
-                cv::matchTemplate(g_frame_in, expected_bead_pos_image, weight, CV_TM_CCOEFF_NORMED);
-                weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
-                // ROS_INFO_STREAM("weight =" << weight.at<float>(0,0));
-                particles_set_update.push_back(particle_trans_mat_update);
-                // beads_pos_update.push_back();
-                // count += 1;
-                // ROS_INFO("numbers of particle generated = %d", count);
+                
             }
-            lowVarianceSampler(particles_set_update, weight_vec, particles_set);
-            // cout << "indx = " << indx << endl;
-            ROS_INFO("particle set size = %d", (int)particles_set.size());
-            // loop_end = ros::Time::now().toSec();
-            loop_end = ros::Time::now().toSec();
-            delta_time = loop_end - loop_begin;
-        }
-        // loop_end = ros::Time::now().toSec();
-        // delta_time = loop_end - loop_begin;
+            // cout << expected_beads_image.at<int>() << endl;
+            // define a mat to store the two expected and observed image
+            cv::Mat blended_image(expected_beads_image.size(), CV_8UC1);
+            
+            // define the expected beads image mat for each particle
+            cv::Mat weight; weight *= 0;
 
-        // sleep.sleep();
-        // loop_end = ros::Time::now().toSec();
-        // delta_time = loop_end - loop_begin;
-        ros::spinOnce();
-        // ROS_INFO("delta_time = %f", delta_time);
+            cv::addWeighted(expected_beads_image, 0.7, oberved_beads_image, 0.3, 0.0, blended_image);
+            cv::imshow("particle filter", blended_image);
+            cv::waitKey(10);
+            cv::matchTemplate(oberved_beads_image, expected_beads_image, weight, CV_TM_CCOEFF_NORMED);
+            weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
+            // ROS_INFO_STREAM("weight =" << weight.at<float>(0,0));
+            particles_set_update.push_back(particle_trans_mat_update);
+            // beads_pos_update.push_back();
+            // count += 1;
+            // ROS_INFO("numbers of particle generated = %d", count);
+        }
+        lowVarianceSampler(particles_set_update, weight_vec, particles_set);
+        // cout << "indx = " << indx << endl;
+        ROS_INFO("particle set size = %d", (int)particles_set.size());
+        observed_trans = observed_trans_updated;
     }
-	return 0;
+    return 0;
 }
+    
+
+
+
+// 	while(ros::ok())
+// 	{   
+//         // ros::console::shutdown();
+//         // loop_begin = ros::Time::now().toSec();
+//         // // delta_time = loop_end - loop_begin;
+//         // ROS_INFO("delta_time = %f", delta_time);
+
+//         if (g_new_image) // if a new image is available, process it.
+//         {
+            
+//             P_mat = cam_proj_mat.getLeftProjectionMatrix();
+
+//             particles_set_update.clear();
+//             beads_pos_update.clear();
+//             weight_vec.clear();
+//             // weight_sum.release(); // clear weight_sum;
+
+//             g_new_image = false;
+
+//             // int count = 0;
+//             loop_begin = ros::Time::now().toSec();
+//             ROS_INFO("delta_time = %f", delta_time);
+//             // begin = ros::Time::now().toSec();
+//             // for each particle
+//             for (int i = 0; i < N; ++i)
+//             {
+//                 // get one new particle from last step
+//                 Eigen::Affine3d particle_trans_mat_update = beadsGenerator.getNewTransformationMatrix(particles_set[i], "body", delta_time);
+//                 // ROS_INFO_STREAM("updated particle trans mat \n" << particle_trans_mat_update.matrix());
+//                 // generate 9 beads position in camera frame
+//                 beadsGenerator.getBeadsPosition(9, 3, 3, list_of_points, particle_trans_mat_update);
+//                 // ROS_INFO_STREAM("beads position generated");
+//                 // beads_pos_update[i] = list_of_points;
+//                 int npts = list_of_points.points.size();
+
+//                 // define the expected beads image mat for each particle
+//                 cv::Mat image_beads(g_frame_in.size(), CV_8UC1);
+//                 image_beads *= 0;
+                
+//                 // define a mat to store the two expected and observed image
+//                 cv::Mat blended_image(g_frame_in.size(), CV_8UC1);
+                
+//                 // define the expected beads image mat for each particle
+//                 cv::Mat weight;
+//                 weight *= 0;
+
+//                 int count(0); // the counter counting number of times failing to draw beads
+//                 // for 9 beads;
+//                 for (int k = 0; k < npts; ++k)
+//                 {   
+//                     // int count(0); // the counter counting number of times failing to draw beads
+//                     // ROS_INFO("start to draw each bead at one time");
+//                     // convert ros geomertry/points to cv::Point3d
+//                     cv::Point3d bead_i_pos(list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
+//                     // ROS_INFO("bead center <%f, %f, %f>", list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
+
+//                     // ROS_INFO("start to render sphere");
+//                     if (bead_i_pos.z < 0)
+//                     {
+//                         count += 1;
+//                         image_beads *= 1;
+//                     }
+//                     else
+//                     {
+//                         cv::Rect bead_i_rendered = cv_3d::renderSphere(image_beads, cv_3d::sphere(bead_i_pos, RADIUS), P_mat);    
+//                     }
+
+//                     // ROS_INFO("one bead drawn");
+//                     // imshow("Black Beads", bead_i_rendered);
+//                 }
+//                 // if count equals to number of beads so the expected image will be left just as blank with white noise.
+//                 if (count == npts)
+//                 {
+//                     image_beads *= 0;
+//                     addNoiseToImage(image_beads);
+//                     // ROS_INFO("adding noise to blank image");
+//                 }
+//                 else
+//                 {
+//                     addNoiseToImage(image_beads);
+//                     // ROS_INFO("adding noise to good image");
+//                 }
+
+//                 cv::addWeighted(image_beads, 0.7, g_frame_in, 0.3, 0.0, blended_image);
+//                 cv::imshow("particle filter", blended_image);
+//                 cv::waitKey(10);
+//                 cv::matchTemplate(g_frame_in, image_beads, weight, CV_TM_CCOEFF_NORMED);
+//                 weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
+//                 // ROS_INFO_STREAM("weight =" << weight.at<float>(0,0));
+//                 particles_set_update.push_back(particle_trans_mat_update);
+//                 // beads_pos_update.push_back();
+//                 // count += 1;
+//                 // ROS_INFO("numbers of particle generated = %d", count);
+//             }
+//             lowVarianceSampler(particles_set_update, weight_vec, particles_set);
+//             // cout << "indx = " << indx << endl;
+//             ROS_INFO("particle set size = %d", (int)particles_set.size());
+//             // loop_end = ros::Time::now().toSec();
+//             loop_end = ros::Time::now().toSec();
+//             delta_time = loop_end - loop_begin;
+//         }
+//         // loop_end = ros::Time::now().toSec();
+//         // delta_time = loop_end - loop_begin;
+
+//         // sleep.sleep();
+//         // loop_end = ros::Time::now().toSec();
+//         // delta_time = loop_end - loop_begin;
+//         ros::spinOnce();
+//         // ROS_INFO("delta_time = %f", delta_time);
+//     }
+// 	return 0;
+// }

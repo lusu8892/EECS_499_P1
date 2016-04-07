@@ -207,14 +207,14 @@ void TransformationGenerator::randomBodyVelocityGenerator(velo_vec::velocityVect
 void TransformationGenerator::hybridVelocityGenerator(velo_vec::velocityVector& hybrid_velo)
 {   
 
-    Eigen::Vector3d trans_velo(1, 1, 1);
+    Eigen::Vector3d trans_velo(0.001, 0, 0);
     Eigen::Vector3d rot_omega(0, 0, 0);
 
     hybrid_velo.transV = trans_velo;
     hybrid_velo.angV = rot_omega;
 }
 
-double TransformationGenerator::gaussRandNumGenerator(double mean, double deviation)
+double TransformationGenerator::gaussRandNumGenerator(double mean, double std_deviation)
 {
     static double V1, V2, S;
     static int phase = 0;
@@ -236,6 +236,6 @@ double TransformationGenerator::gaussRandNumGenerator(double mean, double deviat
          
     phase = 1 - phase;
  
-    X = X * sqrt(deviation) + mean;
+    X = X * std_deviation + mean;
     return X;
 }
