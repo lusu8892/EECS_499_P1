@@ -265,12 +265,12 @@ void drawBeads(const transformation_generator::ListOfPoints& list_of_points, con
     if (count == npts)
     {
         image_beads *= 0;
-        addNoiseToImage(image_beads);
+        // addNoiseToImage(image_beads);
         // ROS_INFO("adding noise to blank image");
     }
     else
     {
-        addNoiseToImage(image_beads);
+        // addNoiseToImage(image_beads);
         // ROS_INFO("adding noise to good image");
     }
 }
@@ -307,7 +307,7 @@ int main(int argc, char** argv) {
     ros::Duration sleep(0.1);
     
     
-    ros::spinOnce();
+    // ros::spinOnce();
     // instaniate a camera projection matrix object
     cv_projective::cameraProjectionMatrices cam_proj_mat(nh, 
             std::string("/camera/camera_info"), std::string("/camera/camera_info"));
@@ -343,11 +343,6 @@ int main(int argc, char** argv) {
     vector<Eigen::Affine3d> particles_set_update;
     vector<transformation_generator::ListOfPoints> beads_pos_update;
     vector<float>  weight_vec;
-    // float weight_sum;
-    
-    // double delta_time = 0.02;
-    double loop_begin(ros::Time::now().toSec()); // set a time for recording the start time of each iteration
-    double loop_end(ros::Time::now().toSec()); // set a time for recording end time of each iteration
 
     double delta_time(0.0);
 
@@ -359,7 +354,15 @@ int main(int argc, char** argv) {
     // ROS_INFO("delta_time = %f", delta_time);
     for(int j = 0; j < time_vec.size() - 1; ++j)
     {
-        delta_time = time_vec[j+1] - time_vec[j];
+        if (j == 0)
+        {
+            delta_time = 0;
+        }
+        else
+        {
+            delta_time = time_vec[j+1] - time_vec[j];
+        }
+        
         P_mat = cam_proj_mat.getLeftProjectionMatrix();
 
         particles_set_update.clear();
@@ -371,7 +374,7 @@ int main(int argc, char** argv) {
         ROS_INFO_STREAM("updated observed transformation matrix \n" << observed_trans_updated.matrix() << "\n");
 
         beadsGenerator.getBeadsPosition(9, 3, 3, ob_list_of_points, observed_trans_updated);
-        cv::Mat oberved_beads_image(g_frame_in.size(), CV_8UC1);
+        cv::Mat oberved_beads_image(100, 100, CV_8UC1);
         drawBeads(ob_list_of_points, P_mat, oberved_beads_image);
 
         // for each particle
@@ -384,7 +387,7 @@ int main(int argc, char** argv) {
             beadsGenerator.getBeadsPosition(9, 3, 3, list_of_points, particle_trans_mat_update);
             // ROS_INFO_STREAM("beads position generated");
             // beads_pos_update[i] = list_of_points
-            cv::Mat expected_beads_image(g_frame_in.size(), CV_8UC1);
+            cv::Mat expected_beads_image(oberved_beads_image.size(), CV_8UC1);
             drawBeads(list_of_points, P_mat, expected_beads_image);
             // define a mat to store the two expected and observed image
             cv::Mat blended_image(expected_beads_image.size(), CV_8UC1);

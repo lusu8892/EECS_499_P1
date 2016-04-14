@@ -128,8 +128,8 @@ Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& tr
         rand_space_velo.transV = trans_mat.linear() * rand_body_velo.transV + skew_trans_mat * trans_mat.linear() * rand_body_velo.angV;
         rand_space_velo.angV = trans_mat.linear() * rand_body_velo.angV;
 
-        rot_omega = delta_time * rand_space_velo.transV;
-        trans_velo = delta_time * rand_space_velo.angV;
+        trans_velo = delta_time * rand_space_velo.transV;
+        rot_omega= delta_time * rand_space_velo.angV;
     }
     else if (flag == "hybrid")
     {   
@@ -142,12 +142,14 @@ Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& tr
         fixed_space_velo.transV = EYE_3 * fixed_hybrid_velo.transV + skew_trans_mat * EYE_3 * fixed_hybrid_velo.angV;
         fixed_space_velo.angV = EYE_3 * fixed_hybrid_velo.angV;
 
-        rot_omega = delta_time * fixed_space_velo.transV;
-        trans_velo = delta_time * fixed_space_velo.angV;
+        trans_velo = delta_time * fixed_space_velo.transV;
+
+        rot_omega = delta_time * fixed_space_velo.angV;
     }
     
     // if rot_omega near to zero then assume the expo_mat linear part is 3-by-3 identity matrix
-    if (rot_omega.norm() < 10e-5)
+    // ROS_INFO_STREAM("rot norm" << rot_omega.norm());
+    if (rot_omega.norm() < 10e-6)
     {
         expo_mat.linear() = EYE_3; // set linear part as 3-by-3 matrix
         expo_mat.translation() = trans_velo;
