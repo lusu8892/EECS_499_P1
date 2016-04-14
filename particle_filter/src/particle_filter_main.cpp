@@ -95,7 +95,7 @@ Eigen::Affine3d randomTransformationMatrixGenerator(double (*func_ptr_0)(double,
     Oe(1)= (*func_ptr_0)(c,d) + input_translation(1);
     Oe(2)= (*func_ptr_0)(e,f) + input_translation(2);
     random_trans_mat.translation() = Oe; // the "translation" part of affine is the vector between origins
-
+    // ROS_INFO_STREAM("Oe" << Oe);
     if (flag == "quaternion")
     {
         Eigen::Quaterniond q;
@@ -148,7 +148,7 @@ void particlesGeneration(vector<Eigen::Affine3d>& particles_set)
 {   
     // particles_set.clear();
     Eigen::Affine3d initial_state = randomTransformationMatrixGenerator(getGaussianRandomNum, 
-                                    getGaussianRandomNum, "no", 0, 0, 0, 0, 0.4, 0.4, 0, 0, 0, 0);
+                                    getGaussianRandomNum, "no", 0, 0, 0, 0, 0.4, 0.01, 0, 0, 0, 0);
     
     initial_state.linear()(0,0) = -1; initial_state.linear()(2,2) = -1;
 
@@ -200,7 +200,7 @@ void lowVarianceSampler(const vector<Eigen::Affine3d>& particles_set_update, con
     for (int i = 0; i < normd_weight_vec.size(); ++i)
     {
         normd_weight_vec[i] = weight_vec[i] / weight_sum;
-        // ROS_INFO("Paritcle No. %d, normalized weight %f", i, normd_weight_vec[i]);
+        ROS_INFO("Paritcle No. %d, normalized weight %f", i, normd_weight_vec[i]);
 
     }
 
@@ -241,8 +241,6 @@ void drawBeads(const transformation_generator::ListOfPoints& list_of_points, con
     // for 9 beads;
     for (int k = 0; k < npts; ++k)
     {   
-        // int count(0); // the counter counting number of times failing to draw beads
-        // ROS_INFO("start to draw each bead at one time");
         // convert ros geomertry/points to cv::Point3d
         cv::Point3d bead_i_pos(list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
         // ROS_INFO("bead center <%f, %f, %f>", list_of_points.points[k].x, list_of_points.points[k].y, list_of_points.points[k].z);
@@ -257,9 +255,6 @@ void drawBeads(const transformation_generator::ListOfPoints& list_of_points, con
         {
             cv::Rect bead_i_rendered = cv_3d::renderSphere(image_beads, cv_3d::sphere(bead_i_pos, RADIUS), projection_matrix);    
         }
-
-        // ROS_INFO("one bead drawn");
-        // imshow("Black Beads", bead_i_rendered);
     }
     // if count equals to number of beads so the expected image will be left just as blank with white noise.
     if (count == npts)
@@ -304,10 +299,7 @@ int main(int argc, char** argv) {
     cv::namedWindow( "particle filter", 1 );
     TransformationGenerator beadsGenerator; // instaniate an object of TransformationGenerator
 
-    ros::Duration sleep(0.1);
-    
-    
-    // ros::spinOnce();
+    ros::Duration sleep(5.0);    
     // instaniate a camera projection matrix object
     cv_projective::cameraProjectionMatrices cam_proj_mat(nh, 
             std::string("/camera/camera_info"), std::string("/camera/camera_info"));
@@ -324,7 +316,7 @@ int main(int argc, char** argv) {
     vector<Eigen::Affine3d> particles_set;
 
     vector<double> time_vec;
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < 10000; ++i)
     {
         double time_increment = i * 1; // time increment is 1 second
         time_vec.push_back(time_increment);
@@ -345,71 +337,85 @@ int main(int argc, char** argv) {
     vector<float>  weight_vec;
 
     double delta_time(0.0);
-
     Eigen::Affine3d observed_trans;
     observed_trans.matrix() = Eigen::MatrixXd::Identity(4,4);
     observed_trans.linear()(0,0) = -1; observed_trans.linear()(2,2) = -1;
     observed_trans.translation() << 0,0,0.4;
-
-    // ROS_INFO("delta_time = %f", delta_time);
-    for(int j = 0; j < time_vec.size() - 1; ++j)
-    {
-        if (j == 0)
+    while(ros::ok())
+    {   
+        if (g_new_image)
         {
-            delta_time = 0;
+            ros::spinOnce();
         }
-        else
-        {
-            delta_time = time_vec[j+1] - time_vec[j];
+        for(int j = 0; j < time_vec.size() - 1; ++j)
+        {  
+            // ros::spinOnce();
+            ROS_INFO("iteration = %d", j);
+            // if (g_new_image)
+            // {
+            //     g_new_image = false;
+                if (j == 0)
+                {
+                    delta_time = 0;
+                }
+                else
+                {
+                    delta_time = time_vec[j+5] - time_vec[j];
+                }
+                
+                P_mat = cam_proj_mat.getLeftProjectionMatrix();
+
+                particles_set_update.clear();
+                beads_pos_update.clear();
+                weight_vec.clear();
+                ROS_INFO("delta_time = %f", delta_time);
+                // cv::Mat oberved_beads_image(100, 100, CV_8UC1);
+                Eigen::Affine3d observed_trans_updated = beadsGenerator.getNewTransformationMatrix(observed_trans, "hybrid", delta_time);
+                // ROS_INFO_STREAM("updated observed transformation matrix \n" << observed_trans_updated.matrix() << "\n");
+
+                beadsGenerator.getBeadsPosition(9, 3, 3, ob_list_of_points, observed_trans_updated);
+                cv::Mat oberved_beads_image(480,640, CV_8UC1);
+                drawBeads(ob_list_of_points, P_mat, oberved_beads_image);
+                // cv::imshow("particle filter", oberved_beads_image);
+                // cv::waitKey(10);
+
+                // for each particle
+                for (int i = 0; i < N; ++i)
+                {
+                    // get one new particle from last step
+                    Eigen::Affine3d particle_trans_mat_update = beadsGenerator.getNewTransformationMatrix(particles_set[i], "body", delta_time);
+                    // ROS_INFO_STREAM("updated particle trans mat \n" << particle_trans_mat_update.matrix());
+                    // generate 9 beads position in camera frame
+                    beadsGenerator.getBeadsPosition(9, 3, 3, list_of_points, particle_trans_mat_update);
+                    // ROS_INFO_STREAM("beads position generated");
+                    // beads_pos_update[i] = list_of_points
+                    cv::Mat expected_beads_image(oberved_beads_image.size(), CV_8UC1);
+                    drawBeads(list_of_points, P_mat, expected_beads_image);
+                    // define a mat to store the two expected and observed image
+                    cv::Mat blended_image(expected_beads_image.size(), CV_8UC1);
+                    
+                    // define the expected beads image mat for each particle
+                    cv::Mat weight; weight *= 0;
+
+                    cv::addWeighted(expected_beads_image, 0.7, oberved_beads_image, 0.3, 0.0, blended_image);
+                    cv::imshow("particle filter", blended_image);
+                    cv::waitKey(10);
+                    cv::matchTemplate(oberved_beads_image, expected_beads_image, weight, CV_TM_CCOEFF_NORMED);
+                    weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
+                    // ROS_INFO_STREAM("weight =" << weight.at<float>(0,0));
+                    particles_set_update.push_back(particle_trans_mat_update);
+                    // beads_pos_update.push_back();
+                    // count += 1;
+                    // ROS_INFO("numbers of particle generated = %d", count);
+                }
+                lowVarianceSampler(particles_set_update, weight_vec, particles_set);
+                // cout << "indx = " << indx << endl;
+                ROS_INFO("particle set size = %d", (int)particles_set.size());
+                observed_trans = observed_trans_updated;
+            // }
+            // ros::spinOnce();
         }
         
-        P_mat = cam_proj_mat.getLeftProjectionMatrix();
-
-        particles_set_update.clear();
-        beads_pos_update.clear();
-        weight_vec.clear();
-
-        // cv::Mat oberved_beads_image(100, 100, CV_8UC1);
-        Eigen::Affine3d observed_trans_updated = beadsGenerator.getNewTransformationMatrix(observed_trans, "hybrid", delta_time);
-        ROS_INFO_STREAM("updated observed transformation matrix \n" << observed_trans_updated.matrix() << "\n");
-
-        beadsGenerator.getBeadsPosition(9, 3, 3, ob_list_of_points, observed_trans_updated);
-        cv::Mat oberved_beads_image(100, 100, CV_8UC1);
-        drawBeads(ob_list_of_points, P_mat, oberved_beads_image);
-
-        // for each particle
-        for (int i = 0; i < N; ++i)
-        {
-            // get one new particle from last step
-            Eigen::Affine3d particle_trans_mat_update = beadsGenerator.getNewTransformationMatrix(particles_set[i], "body", delta_time);
-            // ROS_INFO_STREAM("updated particle trans mat \n" << particle_trans_mat_update.matrix());
-            // generate 9 beads position in camera frame
-            beadsGenerator.getBeadsPosition(9, 3, 3, list_of_points, particle_trans_mat_update);
-            // ROS_INFO_STREAM("beads position generated");
-            // beads_pos_update[i] = list_of_points
-            cv::Mat expected_beads_image(oberved_beads_image.size(), CV_8UC1);
-            drawBeads(list_of_points, P_mat, expected_beads_image);
-            // define a mat to store the two expected and observed image
-            cv::Mat blended_image(expected_beads_image.size(), CV_8UC1);
-            
-            // define the expected beads image mat for each particle
-            cv::Mat weight; weight *= 0;
-
-            cv::addWeighted(expected_beads_image, 0.7, oberved_beads_image, 0.3, 0.0, blended_image);
-            cv::imshow("particle filter", blended_image);
-            cv::waitKey(10);
-            cv::matchTemplate(oberved_beads_image, expected_beads_image, weight, CV_TM_CCOEFF_NORMED);
-            weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
-            // ROS_INFO_STREAM("weight =" << weight.at<float>(0,0));
-            particles_set_update.push_back(particle_trans_mat_update);
-            // beads_pos_update.push_back();
-            // count += 1;
-            // ROS_INFO("numbers of particle generated = %d", count);
-        }
-        lowVarianceSampler(particles_set_update, weight_vec, particles_set);
-        // cout << "indx = " << indx << endl;
-        ROS_INFO("particle set size = %d", (int)particles_set.size());
-        observed_trans = observed_trans_updated;
     }
     return 0;
 }

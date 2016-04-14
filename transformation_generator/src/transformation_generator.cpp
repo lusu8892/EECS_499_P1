@@ -70,43 +70,6 @@ Eigen::Affine3d TransformationGenerator::getNewTransformationMatrix(const Eigen:
     return new_trans_mat;
 }
 
-// // A function randomly generate transformation matrix
-// Eigen::Affine3d TransformationGenerator::randomTransformationMatrixGenerator()
-// {
-//     Eigen::Affine3d random_trans_mat;
-//     Eigen::Vector3d Oe;
-//     Oe(0)= gaussianNumberGenerator(-0.01, 0.01);
-//     Oe(1)= gaussianNumberGenerator(-0.01, 0.01);
-//     Oe(2)= gaussianNumberGenerator(-0.01, 0.01);
-//     random_trans_mat.translation() = Oe; // the "translation" part of affine is the vector between origins
-//     Eigen::Quaterniond q;
-//     // Eigen::Quaterniond<Scalar> 
-//     // double magnitude;
-//     q.x() = gaussianNumberGenerator(-1, 1);
-//     q.y() = gaussianNumberGenerator(-1, 1);
-//     q.z() = gaussianNumberGenerator(-1, 1);
-//     q.w() = gaussianNumberGenerator(-1, 1);
-//     Eigen::Matrix3d Re(q.normalized()); //convenient conversion...initialize a 3x3 orientation matrix
-//     // using a quaternion, q
-//     random_trans_mat.linear() = Re; // the rotational part of affine is the "linear" part
-//     return random_trans_mat;
-// }
-
-// // A function generate random number
-// double TransformationGenerator::gaussianNumberGenerator(double LO, double HI)
-// {
-//     double gaussian_num;
-//     int iteration = 5;
-//     // double LO = -0.01;
-//     // double HI = 0.01;
-
-//     for (int i = 0; i < iteration; ++i)
-//     {
-//        gaussian_num += LO + static_cast <double> (rand()) /( static_cast <double> (RAND_MAX/(HI-LO))); 
-//     }
-//     return gaussian_num;
-// }
-
 // flag: body velocity or hybrid velocity
 Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& trans_mat, const std::string& flag, double delta_time)
 {
