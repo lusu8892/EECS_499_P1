@@ -304,7 +304,9 @@ int main(int argc, char** argv) {
     cv_projective::cameraProjectionMatrices cam_proj_mat(nh, 
             std::string("/camera/camera_info"), std::string("/camera/camera_info"));
     cv::Mat P_mat; // define a cv::Mat variable to store projection matrix
+    P_mat = cam_proj_mat.getLeftProjectionMatrix();
 
+    
     // instaniate an variable of message of transformation_generator::ListOfPoints
     transformation_generator::ListOfPoints list_of_points;
     transformation_generator::ListOfPoints ob_list_of_points;
@@ -343,10 +345,6 @@ int main(int argc, char** argv) {
     observed_trans.translation() << 0,0,0.4;
     while(ros::ok())
     {   
-        if (g_new_image)
-        {
-            ros::spinOnce();
-        }
         for(int j = 0; j < time_vec.size() - 1; ++j)
         {  
             // ros::spinOnce();
@@ -364,6 +362,13 @@ int main(int argc, char** argv) {
                 }
                 
                 P_mat = cam_proj_mat.getLeftProjectionMatrix();
+                ROS_INFO_STREAM(P_mat.at<double>(0,0));
+                while (P_mat.at<double>(0,0) <= 0)
+                {
+                    ros::spinOnce();
+                    P_mat = cam_proj_mat.getLeftProjectionMatrix();
+                }
+                // ROS_INFO_STREAM("projection matrix" << P_mat[1].size());
 
                 particles_set_update.clear();
                 beads_pos_update.clear();
@@ -413,7 +418,7 @@ int main(int argc, char** argv) {
                 ROS_INFO("particle set size = %d", (int)particles_set.size());
                 observed_trans = observed_trans_updated;
             // }
-            // ros::spinOnce();
+            ros::spinOnce();
         }
         
     }
