@@ -88,8 +88,11 @@ Eigen::Affine3d TransformationGenerator::getExpoMatrix(const Eigen::Affine3d& tr
         velo_vec::velocityVector rand_space_velo; // define a random space velocity 
 
         // convert rand_body_velocity to spatial velocity
-        rand_space_velo.transV = trans_mat.linear() * rand_body_velo.transV + skew_trans_mat * trans_mat.linear() * rand_body_velo.angV;
-        rand_space_velo.angV = trans_mat.linear() * rand_body_velo.angV;
+        // rand_space_velo.transV = trans_mat.linear() * rand_body_velo.transV + skew_trans_mat * trans_mat.linear() * rand_body_velo.angV;
+        // rand_space_velo.angV = trans_mat.linear() * rand_body_velo.angV;
+
+        rand_space_velo.transV = EYE_3 * rand_body_velo.transV + skew_trans_mat * EYE_3 * rand_body_velo.angV;
+        rand_space_velo.angV = EYE_3 * rand_body_velo.angV;
 
         trans_velo = delta_time * rand_space_velo.transV;
         rot_omega= delta_time * rand_space_velo.angV;
@@ -153,17 +156,17 @@ void TransformationGenerator::randomBodyVelocityGenerator(velo_vec::velocityVect
     double mean_t = 0.0; // translation mean
     double deviation_t = 0.01; // translation deviation
     double mean_r = 0.0; // rotation mean
-    double deviation_r = 0.01; // rotation deviation
+    double deviation_r = 0.1; // rotation deviation
 
     // generate random body velocity translation part given specified mean and deviation
     trans_velo(0) = gaussRandNumGenerator(mean_t, deviation_t);
-    trans_velo(1) = gaussRandNumGenerator(mean_t, deviation_t);
-    trans_velo(2) = gaussRandNumGenerator(mean_t, deviation_t);
+    trans_velo(1) = gaussRandNumGenerator(0, 0);
+    trans_velo(2) = gaussRandNumGenerator(0, 0);
     
     // generate random body velocity rotation part given specified mean and deviation
-    rot_omega(0) = gaussRandNumGenerator(mean_r, deviation_r);
-    rot_omega(1) = gaussRandNumGenerator(mean_r, deviation_r);
-    rot_omega(2) = gaussRandNumGenerator(mean_r, deviation_r); 
+    rot_omega(0) = gaussRandNumGenerator(0, 0);
+    rot_omega(1) = gaussRandNumGenerator(0, 0);
+    rot_omega(2) = gaussRandNumGenerator(0, 0); 
 
     rand_body_velo.transV = trans_velo;
     rand_body_velo.angV = rot_omega;

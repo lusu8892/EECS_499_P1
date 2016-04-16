@@ -20,7 +20,7 @@
 #include <cwru_opencv_common/projective_geometry.h>
 
 const double PI = 3.14159265359;
-const int N = 1000; // The number of particles the system generates
+const int N = 2000; // The number of particles the system generates
 const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
 const double RADIUS = 0.0082/2;
 
@@ -414,7 +414,7 @@ int main(int argc, char** argv) {
                 {
                     ros::spinOnce();
                     P_mat = cam_proj_mat.getLeftProjectionMatrix();
-                    ROS_INFO("spinning");
+                    // ROS_INFO("to get current projection matrix");
                 }
                 // ROS_INFO_STREAM("projection matrix" << P_mat[1].size());
 
@@ -427,7 +427,7 @@ int main(int argc, char** argv) {
                 // ROS_INFO_STREAM("updated observed transformation matrix \n" << observed_trans_updated.matrix() << "\n");
 
                 beadsGenerator.getBeadsPosition(9, 3, 3, ob_list_of_points, observed_trans_updated);
-                cv::Mat oberved_beads_image(480,640, CV_8UC1);
+                cv::Mat oberved_beads_image(480,1000, CV_8UC1);
                 drawBeads(ob_list_of_points, P_mat, oberved_beads_image);
                 // cv::imshow("particle filter", oberved_beads_image);
                 // cv::waitKey(10);
@@ -453,10 +453,10 @@ int main(int argc, char** argv) {
                     cv::addWeighted(expected_beads_image, 0.7, oberved_beads_image, 0.3, 0.0, blended_image);
                     cv::imshow("particle filter", blended_image);
                     cv::waitKey(10);
-                    // cv::matchTemplate(oberved_beads_image, expected_beads_image, weight, CV_TM_CCOEFF_NORMED);
+                    cv::matchTemplate(oberved_beads_image, expected_beads_image, weight, CV_TM_CCOEFF_NORMED);
 
-                    weight_vec.push_back(imageCompareHist(expected_beads_image, oberved_beads_image));
-                    // weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
+                    // weight_vec.push_back(imageCompareHist(expected_beads_image, oberved_beads_image));
+                    weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
                     // ROS_INFO_STREAM("weight =" << weight.at<float>(0,0));
                     particles_set_update.push_back(particle_trans_mat_update);
                     // beads_pos_update.push_back();
