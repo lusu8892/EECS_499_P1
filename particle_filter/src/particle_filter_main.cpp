@@ -154,10 +154,10 @@ void particlesGeneration(vector<Eigen::Affine3d>& particles_set)
 
     // ROS_INFO_STREAM("initial state rotation part \n" << initial_state.linear());
 
-    Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getUniformRandomNum, 
-                                getUniformRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, Eigen::Vector3d(0,0,1));
+    Eigen::Affine3d rot_mat_z = randomTransformationMatrixGenerator(getGaussianRandomNum, 
+                                getGaussianRandomNum, "arbitrary", 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, Eigen::Vector3d(0,0,1));
 
-    double theta = getUniformRandomNum(0, 0.1*PI);
+    double theta = getGaussianRandomNum(0, 0.1*PI);
     Eigen::Vector3d rot_axis(cos(theta), sin(theta), 0);
     
     Eigen::Affine3d rot_mat_a = randomTransformationMatrixGenerator(getGaussianRandomNum, 
@@ -270,6 +270,53 @@ void drawBeads(const transformation_generator::ListOfPoints& list_of_points, con
     }
 }
 
+double imageCompareHist(const cv::Mat& src_base, const cv::Mat& src_test1)
+{
+    cv::Mat hsv_base;
+    cv::Mat hsv_test1;
+
+
+    /// Convert to HSV
+    cv::cvtColor( src_base, hsv_base, CV_GRAY2RGB );
+    cv::cvtColor( src_test1, hsv_test1, CV_GRAY2RGB );
+
+    cv::cvtColor( hsv_base, hsv_base, CV_RGB2HSV );
+    cv::cvtColor( hsv_test1, hsv_test1, CV_RGB2HSV );
+
+
+    // hsv_half_down = hsv_base( Range( hsv_base.rows/2, hsv_base.rows - 1 ), Range( 0, hsv_base.cols - 1 ) );
+
+    /// Using 50 bins for hue and 60 for saturation
+    int h_bins = 50; int s_bins = 60;
+    int histSize[] = { h_bins, s_bins };
+
+    // hue varies from 0 to 179, saturation from 0 to 255
+    float h_ranges[] = { 0, 180 };
+    float s_ranges[] = { 0, 256 };
+
+    const float* ranges[] = { h_ranges, s_ranges };
+
+    // Use the o-th and 1-st channels
+    int channels[] = { 0, 1 };
+
+
+    /// Histograms
+    cv::MatND hist_base;
+    cv::MatND hist_test1;
+
+    /// Calculate the histograms for the HSV images
+    cv::calcHist( &hsv_base, 1, channels, cv::Mat(), hist_base, 2, histSize, ranges, true, false );
+    cv::normalize( hist_base, hist_base, 0, 1, 32, -1, cv::Mat() );
+
+    cv::calcHist( &hsv_test1, 1, channels, cv::Mat(), hist_test1, 2, histSize, ranges, true, false );
+    cv::normalize( hist_test1, hist_test1, 0, 1, 32, -1, cv::Mat() );
+
+    /// Apply the histogram comparison methods
+    double weight = cv::compareHist( hist_base, hist_test1, CV_COMP_INTERSECT);
+
+    // printf( "Done \n" );
+    return weight;
+}
 
 void checkImageElement(const cv::Mat& input_image)
 {
@@ -367,11 +414,12 @@ int main(int argc, char** argv) {
                 {
                     ros::spinOnce();
                     P_mat = cam_proj_mat.getLeftProjectionMatrix();
+                    ROS_INFO("spinning");
                 }
                 // ROS_INFO_STREAM("projection matrix" << P_mat[1].size());
 
                 particles_set_update.clear();
-                beads_pos_update.clear();
+                // beads_pos_update.clear();
                 weight_vec.clear();
                 ROS_INFO("delta_time = %f", delta_time);
                 // cv::Mat oberved_beads_image(100, 100, CV_8UC1);
@@ -405,8 +453,10 @@ int main(int argc, char** argv) {
                     cv::addWeighted(expected_beads_image, 0.7, oberved_beads_image, 0.3, 0.0, blended_image);
                     cv::imshow("particle filter", blended_image);
                     cv::waitKey(10);
-                    cv::matchTemplate(oberved_beads_image, expected_beads_image, weight, CV_TM_CCOEFF_NORMED);
-                    weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
+                    // cv::matchTemplate(oberved_beads_image, expected_beads_image, weight, CV_TM_CCOEFF_NORMED);
+
+                    weight_vec.push_back(imageCompareHist(expected_beads_image, oberved_beads_image));
+                    // weight_vec.push_back(weight.at<float>(0,0)); // convert cv::Mat to float number and push back 
                     // ROS_INFO_STREAM("weight =" << weight.at<float>(0,0));
                     particles_set_update.push_back(particle_trans_mat_update);
                     // beads_pos_update.push_back();
