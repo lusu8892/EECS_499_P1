@@ -19,6 +19,7 @@
 #include <cwru_opencv_common/opencv_geometry_3d.h>
 #include <cwru_opencv_common/projective_geometry.h>
 
+
 const double PI = 3.14159265359;
 const int N = 2000; // The number of particles the system generates
 const Eigen::Matrix3d EYE_3 = Eigen::MatrixXd::Identity(3,3);
