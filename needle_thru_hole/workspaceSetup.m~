@@ -1,0 +1,18 @@
+%% workspaceSetup.m
+
+% This is the script to setup the workspace of needle thru hole problem.
+% What included in the script is the parameters that describe a 2D planar
+% tissue block with a hole in the middle.
+
+%% Parameters
+tissue = [-25  25  25 -25 -25  25  25 -25; 25 25 -25 -25 25 25 -25 -25];
+structTissueData =struct('center',[0; -10; 0],'widthX',[30],'heightZ',[10],'depthY',[10]);
+
+wall = [-2 ;25]
+
+clf;
+axis([-50 50 -50 50]);
+axis square;
+
+%Plot the box.
+line(tissue(1,:),tissue(2,:),'color','blue');
