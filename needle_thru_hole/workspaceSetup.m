@@ -31,7 +31,22 @@ transMatFrmNeedleToTissue.rot = [-1 0 0;0 1 0;0 0 -1]; % the initial need frame 
 transMatFrmNeedleToTissue.trans = needle_tip_pos_init - transMatFrmNeedleToTissue.rot * structNeedleGeometry.radius * [-1 0 0]';
 
 %% test checkCollision
-structStraightLine = struct('start',[0; 0; 0],'end',[-40; 0; 0]);    
+% define the boundry of the map
+mapUpBound = struct('start',[-50; 50; 0],'end',[50; 50; 0]);
+mapLefeBound = struct('start',[50; 50; 0],'end',[50; -50; 0]);
+mapBottomBound = struct('start',[50; -50; 0],'end',[-50; -50; 0]);
+mapRightBound = struct('start',[-50; -50; 0],'end',[-50; 50; 0]);
+
+% define the boundry of the objects
+% top wall
+topWallRight = struct('start',[-5; 5; 0],'end',[-5; 50; 0]);
+topWallLeft = struct('start',[5; 5; 0],'end',[5; 50; 0]);
+topWallBottom = struct('start',[-5; 5; 0],'end',[5; 5; 0]);
+% bottom wall
+downWallRight = struct('start',[-5; -5; 0],'end',[-5; -50; 0]);
+downWallLeft = struct('start',[5; -5; 0],'end',[5; -50; 0]);
+downWallBottom = struct('start',[-5; -5; 0],'end',[5; -5; 0]);
+
 checkCollision( structStraightLine, structNeedleGeometry, transMatFrmNeedleToTissue);
     
     
