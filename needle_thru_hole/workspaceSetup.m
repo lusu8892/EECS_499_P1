@@ -31,7 +31,7 @@ transMatFrmNeedleToTissue.rot = [-1 0 0;0 1 0;0 0 -1]; % the initial need frame 
 transMatFrmNeedleToTissue.trans = needle_tip_pos_init - transMatFrmNeedleToTissue.rot * structNeedleGeometry.radius * [-1 0 0]';
 
 %% test checkCollision
-structStraightLine = struct('start',[-20; 10; 0],'end',[-20; -10; 0]);    
+structStraightLine = struct('start',[0; 0; 0],'end',[-40; 0; 0]);    
 checkCollision( structStraightLine, structNeedleGeometry, transMatFrmNeedleToTissue);
     
     

@@ -6,6 +6,8 @@
 %		 3. the transformation matrix from needle to tissue
 % 
 % Output: boolean value which represents collided or not.
+%         false: no intersection with semicircle curve
+%         true: intersected with semicircle curve
 
 %% Main funtion
 function [ boolean ] = checkCollision( structStraightLine, structNeedleGeometry, trans_mat)
@@ -31,14 +33,67 @@ function [ boolean ] = checkCollision( structStraightLine, structNeedleGeometry,
     c = poly_coeff(3);
     
     delta = b^2 - 4 * a * c; % discrminant of polynomial eqn
-    
-    if (delta > 0)
+    point_on_line = [];
+    if (delta > 0) % two intersectioin with circle
         poly_roots = solve(poly_eqn);
-        if ((poly_roots(1) >= 0 && poly_roots(1) <= 1) ||...
-             (poly_roots(2) >= 0 && poly_roots(2) <= 1))
-        else
+        if (poly_roots(1) >= 0 && poly_roots(1) <= 1) &&... % with two points on 
+             (poly_roots(2) >= 0 && poly_roots(2) <= 1)
+            lambda = poly_roots;
+            point_on_line(:,1) = lambda(1) .* point_end + (1 - lambda(1)) .* point_start;
+            point_on_line(:,2) = lambda(2) .* point_end + (1 - lambda(2)) .* point_start;
             
-         
-    else
+            check_result(1) = checkAngle(point_on_line(:,1), point_center, trans_mat);
+            check_result(2) = checkAngle(point_on_line(:,2), point_center, trans_mat);
 
+            if (check_result(1) >= 0 || check_result(2) >= 0)
+                boolean = true; % intersected
+            else
+                boolean = false; % not intersected
+            end    
+        elseif (poly_roots(1) >= 0 && poly_roots(1) <= 1) ||...
+             (poly_roots(2) >= 0 && poly_roots(2) <= 1)
+
+            if (poly_roots(1) >= 0 && poly_roots(1) <= 1)
+                lambda = poly_roots(1);
+                point_on_line = lambda * point_end + (1 - lambda) * point_start;            
+            elseif (poly_roots(2) >= 0 && poly_roots(2) <= 1)
+                lambda = poly_roots(2);
+                point_on_line = lambda * point_end + (1 - lambda) * point_start;
+            end
+
+            check_result = checkAngle(point_on_line, point_center, trans_mat);
+            if (check_result >= 0)
+                boolean = true; % intersected
+            else
+                boolean = false; % not intersected
+            end
+            
+        else
+            boolean = true;    
+        end
+                    
+    elseif (delta == 10e-5) % one intersection
+        poly_roots = solve(poly_eqn);
+        lambda = poly_roots;
+        point_on_line = lambda * point_end + (1 - lambda) * point_start;
+        
+        check_result = checkAngle(point_on_line, point_center, trans_mat);
+        if (check_result >= 0)
+            boolean = true; % intersected
+        else
+            boolean = false; % not intersected
+        end
+                  
+    else % otherwise there is no intersecion
+        boolean = false;
+    end
+
+end
+
+%% subfunction
+function [check_result] = checkAngle( point_1, point_2, trans_mat)
+    vec = point_1 - point_2;
+    y_vec = trans_mat.rot * [0;1;0];
+    
+    check_result = dot(vec, y_vec);
 end
