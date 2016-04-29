@@ -10,13 +10,68 @@
 %         true: intersected with semicircle curve
 
 %% main function
-function [ output ] = genRandomConfig()
-    random_config_pt = struct('x','y','theta','prev_pt');
-    
-    random_config_pt.x = 
-    random_config_pt.y = 
-    random_config_pt.theta = 
-    random_config_pt.prev-pt = 
+function [ sample_node ] = genRandomConfig()
+    sample_node = [];
+    % map info
+    mapUpBound = struct('start',[-50; 50; 0],'end',[50; 50; 0]);
+    mapLeftBound = struct('start',[50; 50; 0],'end',[50; -50; 0]);
+    mapBottomBound = struct('start',[50; -50; 0],'end',[-50; -50; 0]);
+    mapRightBound = struct('start',[-50; -50; 0],'end',[-50; 50; 0]);
 
-    checkCollision
+    % define the boundry of the objects
+    % top wall
+    topWallRight = struct('start',[-5; 5; 0],'end',[-5; 50; 0]);
+    topWallLeft = struct('start',[5; 5; 0],'end',[5; 50; 0]);
+    topWallBottom = struct('start',[-5; 5; 0],'end',[5; 5; 0]);
+    % bottom wall
+    downWallRight = struct('start',[-5; -5; 0],'end',[-5; -50; 0]);
+    downWallLeft = struct('start',[5; -5; 0],'end',[5; -50; 0]);
+    downWallBottom = struct('start',[-5; -5; 0],'end',[5; -5; 0]);
+    
+    % push back to map_info array
+    map_info = [];
+    map_info = [map_info; mapUpBound];
+    map_info = [map_info; mapLeftBound];
+    map_info = [map_info; mapBottomBound];
+    map_info = [map_info; mapRightBound];
+    map_info = [map_info; topWallRight];
+    map_info = [map_info; topWallLeft];
+    map_info = [map_info; topWallBottom];
+    map_info = [map_info; downWallRight];
+    map_info = [map_info; downWallLeft];
+    map_info = [map_info; downWallBottom];
+    
+    % needle structure
+    structNeedleGeometry = struct('straightL',0,'kinkAngle', 0, 'radius',10,'arc',pi);
+    % define a struture to store transformation matrix
+    trans_mat = struct('rot', zeros(3), 'trans', zeros(3,1));
+    
+    while (true)
+        % based on map info generate random sample configuration and check collision
+        x = (mapLeftBound.start(1) - mapRightBound.start(1)) * rand();
+        y = (mapUpBound.start(2) - mapBottomBound.start(2)) * rand();
+        z = 0;
+        theta = (2 * pi) * rand();
+        trans_mat.rot = [cos(theta) -sin(theta) 0;sin(theta) cos(theta) 0;0 0 1];
+        trans_mat.trans = [x;y;z];
+        
+        check_result_list = [];
+        for i = 1 : length(map_info)
+            check_result_list(i,:) = checkCollision(map_info(i), structNeedleGeometry, trans_mat);
+            if (check_result_list(i,:) == true)
+                break;
+            else
+                continue;
+            end
+        end
+        
+        if (isequal(check_result_list, zeros(length(map_info),1)))
+            sample_node(1,:) = x;
+            sample_node(2,:) = y;
+            sample_node(3,:) = theta;
+            return;
+        else
+            continue;
+        end
+    end
 end

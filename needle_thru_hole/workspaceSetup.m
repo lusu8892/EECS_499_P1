@@ -47,7 +47,8 @@ downWallRight = struct('start',[-5; -5; 0],'end',[-5; -50; 0]);
 downWallLeft = struct('start',[5; -5; 0],'end',[5; -50; 0]);
 downWallBottom = struct('start',[-5; -5; 0],'end',[5; -5; 0]);
 
-checkCollision( structStraightLine, structNeedleGeometry, transMatFrmNeedleToTissue);
+sample_node = genRandomConfig();
+disp(sample_node);
     
     
     
