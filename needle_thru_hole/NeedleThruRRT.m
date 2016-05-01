@@ -36,7 +36,7 @@ classdef NeedleThruRRT < handle
     
     methods
         % class constructor
-        function this = FNSimple2D(rand_seed, max_nodes, map, conf)
+        function this = NeedleThruRRT(rand_seed, max_nodes, map, conf)
             max_nodes = int32(max_nodes);
             this.max_nodes = max_nodes;
             rng(rand_seed);

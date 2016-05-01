@@ -10,8 +10,9 @@
 %         true: intersected with semicircle curve
 
 %% main function
-function [ sample_node ] = genRandomConfig()
-    sample_node = [];
+function [ sample_node ] = genRandomConfig(rnd_num)
+    sample_node.position = [];
+    sample_node.direction = 0;
     % map info
     mapUpBound = struct('start',[-50; 50; 0],'end',[50; 50; 0]);
     mapLeftBound = struct('start',[50; 50; 0],'end',[50; -50; 0]);
@@ -47,11 +48,12 @@ function [ sample_node ] = genRandomConfig()
     trans_mat = struct('rot', zeros(3), 'trans', zeros(3,1));
     
     while (true)
+       
         % based on map info generate random sample configuration and check collision
-        x = (mapLeftBound.start(1) - mapRightBound.start(1)) * rand();
-        y = (mapUpBound.start(2) - mapBottomBound.start(2)) * rand();
+        x = (mapLeftBound.start(1) - mapRightBound.start(1)) * rnd_num;
+        y = (mapUpBound.start(2) - mapBottomBound.start(2)) * rnd_num;
         z = 0;
-        theta = (2 * pi) * rand();
+        theta = (2 * pi) * rnd_num;
         trans_mat.rot = [cos(theta) -sin(theta) 0;sin(theta) cos(theta) 0;0 0 1];
         trans_mat.trans = [x;y;z];
         
@@ -66,9 +68,8 @@ function [ sample_node ] = genRandomConfig()
         end
         
         if (isequal(check_result_list, zeros(length(map_info),1)))
-            sample_node(1,:) = x;
-            sample_node(2,:) = y;
-            sample_node(3,:) = theta;
+            sample_node.position = [x;y;z];
+            sample_node.direction = theta;
             return;
         else
             continue;

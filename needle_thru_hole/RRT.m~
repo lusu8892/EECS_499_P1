@@ -1,0 +1,12 @@
+function [ tree ] = RRT( initial_config, goal_config, max_nodes, max_iter )
+    
+    for i = 1:max_iter
+        rnd_num = rand();
+        if (rnd_num < 0.05)
+        q_rand = genRandomConfig();
+
+
+
+    end
+end
+
