@@ -67,10 +67,3 @@ function dist = findNearestNode(q_selected, q_rand)
     dist = 1/3 * (((x_rand - x_selected)/x_span)^2 + ((y_rand - y_selected)/y_span)^2 ...
                     + theta_min/((2*pi)^2));
 end
-
-function theta_min = findThetaMin(theta_1, theta_2)
-    a = (theta_1 - theta_2) ^ 2;
-    b = (theta_1 - theta_2 - 2*pi) ^ 2;
-    c = (theta_1 - theta_2 + 2*pi) ^ 2;
-    theta_min = min([a b c]);
-end
