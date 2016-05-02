@@ -25,11 +25,11 @@ function [ output_args ] = NeedleThruHoleMainFunc()
     %% the number of attempts to expand the tree
     MAX_NODE = 5000;
     MAX_ITER = 5000;
-    STEP_SIZE = 1;
+%     STEP_SIZE = 1;
     %% read in map info
     run('map_info_script');
     %% execute RRT
-    [ tree ] = RRT( needle_tip_pos_init, needle_tip_pose_goal, MAX_NODE, MAX_ITER, STEP_SIZE, map_info);
+    [ tree ] = RRT( needle_tip_pos_init, needle_tip_pose_goal, MAX_NODE, MAX_ITER, map_info);
     
 end
 

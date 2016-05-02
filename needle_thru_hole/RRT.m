@@ -1,4 +1,4 @@
-function [ tree ] = RRT( initial_config, goal_config, max_nodes, max_iter, step_size, map_info)
+function [ tree ] = RRT( initial_config, goal_config, max_nodes, max_iter, map_info)
     
     tree = struct('nodeIndex',[],'nodeConfig',[]);
     tree(1).nodeIndex = 1;
@@ -18,7 +18,7 @@ function [ tree ] = RRT( initial_config, goal_config, max_nodes, max_iter, step_
             % 95% chance to get other collision free random sample
             q_rand = collisionFreeRandomConfig(rnd_num, map_info);
         end
-        extendRRT(tree, q_rand, step_size, resolution, map_info);
+        extendRRT(tree, q_rand, resolution, map_info);
      end
 end
 
