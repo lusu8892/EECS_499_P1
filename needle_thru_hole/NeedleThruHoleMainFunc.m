@@ -23,13 +23,13 @@ function [ output_args ] = NeedleThruHoleMainFunc()
     goalTransMatFrmNeedleToTissue.trans = needle_tip_pose_goal.position - goalTransMatFrmNeedleToTissue.rot...
                                     * structNeedleGeometry.radius * [1 0 0]';
     %% the number of attempts to expand the tree
-    MAX_NODE = 5000;
+%     MAX_NODE = 5000;
     MAX_ITER = 5000;
-%     STEP_SIZE = 1;
+    STEP_SIZE = 0.01;
     %% read in map info
     run('map_info_script');
     %% execute RRT
-    [ tree ] = RRT( needle_tip_pos_init, needle_tip_pose_goal, MAX_NODE, MAX_ITER, map_info);
+    [ tree ] = RRT( needle_tip_pos_init, needle_tip_pose_goal, MAX_ITER, STEP_SIZE, map_info);
     
 end
 

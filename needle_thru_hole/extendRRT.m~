@@ -14,27 +14,12 @@ function q_new = extendRRT( tree, q_rand, step_size, map_info)
             q_new = NaN;
         else
             checkThru;
-            if ()
-                return;
-            else
-                q_new = NaN;
-            end
         end
     else
-        checkThru();
-        if ()
-            return;
-        else
-            q_new = NaN;
-        end
+        
     end
     % 
     
-    if (isnan(q_new)) % if q_new == NaN then jump to another iteration
-        continue;
-    else
-        tree = insertNodeToTree( tree, q_near, q_new);
-    end
 
 
 end
@@ -70,11 +55,6 @@ function [q_new, flag] = getNewNode(q_nearest, q_rand, step_size, distance)
         end
         flag = 0; % q_new = new node
     end
-end
-
-%% subfunction insert
-function tree = insertNodeToTree( tree, q_parent, q_new)
-    tree.nodeIndex = [tree.nodeIndex; length(tree.nodeIndex) + 1];
-    tree.nodeConfig = [tree.nodeConfig; q_new];
-    tree.parentNodeIndex = [tree.parentNodeIndex; q_parent.nodeIndex];
+    
+    
 end

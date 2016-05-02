@@ -1,9 +1,8 @@
 function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_info)
     
-    tree = struct('nodeIndex',[],'nodeConfig',[],'parentNodeIndex',[]);
+    tree = struct('nodeIndex',[],'nodeConfig',[]);
     tree(1).nodeIndex = 1;
     tree(1).nodeConfig = initial_config;
-    tree(1).parentNodeIndex = 1;
     
     x_resolution = 0.2;
     y_resolution = 0.2;
@@ -20,6 +19,15 @@ function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_i
             q_rand = collisionFreeRandomConfig(rnd_num, map_info);
         end
         
-        tree = extendRRT(tree, q_rand, step_size, map_info);    
+        q_new = extendRRT(tree, q_rand, step_size, map_info);
+        if (isnan(q_new)) % if q_new == NaN then jump to another iteration
+            continue;
+        else
+            tree = insertNodeToTree( tree, q_new );
+        end    
      end
 end
+
+%% subfunction insert
+function tree = insertNodeToTree( tree, q_new )
+
