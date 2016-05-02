@@ -13,7 +13,6 @@
 function [ collision ] = checkCollision(obstacle, node_config)
 %CHECKCOLLISION Summary of this function goes here
 %   Detailed explanation goes here
-    
     % needle structure
     structNeedleGeometry = struct('straightL',0,'kinkAngle', 0, 'radius',10,'arc',pi);
     radius = structNeedleGeometry.radius;
