@@ -1,4 +1,4 @@
-function [ tree ] = RRT( initial_config, goal_config, max_nodes, max_iter, step_size )
+function [ tree ] = RRT( initial_config, goal_config, max_nodes, max_iter, step_size, map_info)
     
     tree = struct('nodeIndex',[],'nodeConfig',[]);
     tree(1).nodeIndex = 1;
@@ -12,11 +12,13 @@ function [ tree ] = RRT( initial_config, goal_config, max_nodes, max_iter, step_
     for i = 1:max_iter
         rnd_num = rand();
         if (rnd_num < 0.05)
+            % 5% chance to sample goal_config
             q_rand = goal_config;
         else
-            q_rand = genRandomConfig(rnd_num);
+            % 95% chance to get other collision free random sample
+            q_rand = collisionFreeRandomConfig(rnd_num, map_info);
         end
-        extendRRT(tree, q_rand, step_size, resolution);
+        extendRRT(tree, q_rand, step_size, resolution, map_info);
      end
 end
 

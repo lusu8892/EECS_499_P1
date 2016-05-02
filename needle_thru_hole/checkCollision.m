@@ -10,14 +10,30 @@
 %         true: intersected with semicircle curve
 
 %% Main funtion
-function [ boolean ] = checkCollision( structStraightLine, structNeedleGeometry, trans_mat)
+function [ collision ] = checkCollision(obstacle, node_config)
 %CHECKCOLLISION Summary of this function goes here
 %   Detailed explanation goes here
     
+    % needle structure
+    structNeedleGeometry = struct('straightL',0,'kinkAngle', 0, 'radius',10,'arc',pi);
     radius = structNeedleGeometry.radius;
-    point_start = structStraightLine.start;
-    point_end = structStraightLine.end;
+    
+    % obstacle info expressed as line by defining starting and ending point
+    point_start = obstacle.start;
+    point_end = obstacle.end;
 
+    % define a struture to store transformation matrix
+    trans_mat = struct('rot', zeros(3), 'trans', zeros(3,1));
+    
+    x = node_config.position(1);
+    y = node_config.position(2);
+    z = node_config.position(3);
+    
+    theta = node_config.direction;
+    
+    trans_mat.rot = [cos(theta) -sin(theta) 0;sin(theta) cos(theta) 0;0 0 1];
+    trans_mat.trans = [x;y;z];
+    
     point_center = trans_mat.trans;
 
     syms lambda real;
@@ -46,9 +62,9 @@ function [ boolean ] = checkCollision( structStraightLine, structNeedleGeometry,
             check_result(2) = checkAngle(point_on_line(:,2), point_center, trans_mat);
 
             if (check_result(1) >= 0 || check_result(2) >= 0)
-                boolean = true; % intersected
+                collision = true; % intersected
             else
-                boolean = false; % not intersected
+                collision = false; % not intersected
             end    
         elseif (poly_roots(1) >= 0 && poly_roots(1) <= 1) ||...
              (poly_roots(2) >= 0 && poly_roots(2) <= 1)
@@ -63,13 +79,13 @@ function [ boolean ] = checkCollision( structStraightLine, structNeedleGeometry,
 
             check_result = checkAngle(point_on_line, point_center, trans_mat);
             if (check_result >= 0)
-                boolean = true; % intersected
+                collision = true; % intersected
             else
-                boolean = false; % not intersected
+                collision = false; % not intersected
             end
             
         else
-            boolean = true;    
+            collision = true;    
         end
                     
     elseif (delta == 10e-5) % one intersection
@@ -79,13 +95,13 @@ function [ boolean ] = checkCollision( structStraightLine, structNeedleGeometry,
         
         check_result = checkAngle(point_on_line, point_center, trans_mat);
         if (check_result >= 0)
-            boolean = true; % intersected
+            collision = true; % intersected
         else
-            boolean = false; % not intersected
+            collision = false; % not intersected
         end
                   
     else % otherwise there is no intersecion
-        boolean = false;
+        collision = false;
     end
 
 end
