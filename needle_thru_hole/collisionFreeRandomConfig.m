@@ -22,16 +22,16 @@ function [ sample_node ] = collisionFreeRandomConfig(map_info)
         sample_node.position(2,:) = 100 * rand();
         sample_node.position(3,:) = 0;
         sample_node.direction = (2 * pi) * rand();
-        plot(sample_node.position(1,:),sample_node.position(2,:),'o');
-        hold on
-        pause(1);
+%         plot(sample_node.position(1,:),sample_node.position(2,:),'o');
+%         hold on
+%         pause(1);
         
-%         collision = collisionDetection(map_info, sample_node);
-%         
-%         if (collision == true)
-%             continue;
-%         else
-%             return;
-%         end
+        collision = collisionDetection(map_info, sample_node);
+        
+        if (collision == true)
+            continue;
+        else
+            return;
+        end
     end
 end

@@ -46,7 +46,7 @@ function one_step_sz_collision = checkOneStepSzThru(map_info, q_new, q_near, res
     [num_of_steps, delta_x, delta_y, delta_theta] = getNumOfStepsAndIncrement(q_new, q_near, resolution);
     
     q_new_insertion.position(1,:) = q_near.position(1);
-    q_new_insertion.position(1,:) = q_near.position(2);
+    q_new_insertion.position(2,:) = q_near.position(2);
     q_new_insertion.position(3,:) = 0;
     q_new_insertion.direction = q_near.direction;
         

@@ -12,7 +12,7 @@ function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_i
     
     plotTree();
     
-    s = rng;
+%     s = rng;
     
     for i = 1:max_iter
         rnd_num = rand();
