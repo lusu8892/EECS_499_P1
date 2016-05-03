@@ -7,7 +7,7 @@
 %         2. the shorest normalized distance
 
 %% nearestNode.m function starts below
-function [ q_near, normalized_dist_min] = nearestNode( tree, q_rand)
+function [ q_near, q_near_index, normalized_dist_min] = nearestNode( tree, q_rand)
     node_num = length(tree.nodeIndex);
     normalized_dist_vec = [];
     for i = 1:node_num
@@ -18,7 +18,8 @@ function [ q_near, normalized_dist_min] = nearestNode( tree, q_rand)
     end
     
     [normalized_dist_min, index] = min(normalized_dist_vec);
-    q_near = tree.nodeConfig(index); 
+    q_near = tree.nodeConfig(index);
+    q_near_index = index;
 end
 
 %% subfunction to calculate the normalized distance btw q_rand and q_selected

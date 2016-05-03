@@ -10,17 +10,18 @@
 %         true: intersected with semicircle curve
 
 %% main function
-function [ sample_node ] = collisionFreeRandomConfig(rnd_num, map_info)
+function [ sample_node ] = collisionFreeRandomConfig(map_info)
     sample_node.position = [];
     sample_node.direction = 0;
 
     while (true)
        
+        
         % based on map info generate random sample configuration and check collision
-        sample_node.position(1,:) = (map_info(2).start(1) - map_info(4).start(1)) * rnd_num;
-        sample_node.position(2,:) = (map_info(1).start(2) - map_info(3).start(2)) * rnd_num;
+        sample_node.position(1,:) = 100 * rand();
+        sample_node.position(2,:) = 100 * rand();
         sample_node.position(3,:) = 0;
-        sample_node.direction = (2 * pi) * rnd_num;
+        sample_node.direction = (2 * pi) * rand();
         
         collision = collisionDetection(map_info, sample_node);
         

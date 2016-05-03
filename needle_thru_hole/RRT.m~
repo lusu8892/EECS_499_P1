@@ -1,13 +1,16 @@
 function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_info)
     
-    tree = struct('nodeIndex',[],'nodeConfig',[]);
+    tree = struct('nodeIndex',[],'nodeConfig',[],'parentNodeIndex',[]);
     tree(1).nodeIndex = 1;
     tree(1).nodeConfig = initial_config;
+    tree(1).parentNodeIndex = 1;
     
     x_resolution = 0.2;
     y_resolution = 0.2;
     theta_resolution = 0.2;
     resolution = [x_resolution y_resolution theta_resolution];
+    
+    plotTree(map_info);
     
     for i = 1:max_iter
         rnd_num = rand();
@@ -16,18 +19,25 @@ function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_i
             q_rand = goal_config;
         else
             % 95% chance to get other collision free random sample
-            q_rand = collisionFreeRandomConfig(rnd_num, map_info);
+            q_rand = collisionFreeRandomConfig(map_info);
         end
         
-        q_new = extendRRT(tree, q_rand, step_size, map_info);
-        if (isnan(q_new)) % if q_new == NaN then jump to another iteration
-            continue;
-        else
-            tree = insertNodeToTree( tree, q_new );
-        end    
+        tree = extendRRT(tree, q_rand, step_size, map_info, resolution);
+        plot()
      end
 end
 
-%% subfunction insert
-function tree = insertNodeToTree( tree, q_new )
-
+%% subfunction plot nodes
+function plotTree()
+    clf;
+    axis([0 100 0 100]);
+    axis square;
+    % Parameters
+    tissue = [0  0  100 100 0; 0 100 100 0 0];
+    wall_top = [45  2 2;100 5 5 25];
+    wall_bottom = [-2 -2 2 2;-25 -5 -5 -25];
+    % Plot the box.
+    line(tissue(1,:),tissue(2,:),'color','blue');
+    line(wall_top(1,:),wall_top(2,:),'color','blue');
+    line(wall_bottom(1,:),wall_bottom(2,:),'color','blue');
+end

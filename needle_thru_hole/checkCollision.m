@@ -9,7 +9,7 @@
 %         true: intersected with semicircle curve
 
 %% checkCollision.m function starts below
-function [ collision ] = checkCollision(obstacle, node_config)
+function collision  = checkCollision(obstacle, node_config)
     % needle structure
     structNeedleGeometry = struct('straightL',0,'kinkAngle', 0, 'radius',10,'arc',pi);
     radius = structNeedleGeometry.radius;
@@ -44,9 +44,11 @@ function [ collision ] = checkCollision(obstacle, node_config)
     b = poly_coeff(2);
     c = poly_coeff(3);
     
+    eps = 10e-8;
+    
     delta = b^2 - 4 * a * c; % discrminant of polynomial eqn
     point_on_line = [];
-    if (delta > 0) % two intersectioin with circle
+    if (delta > eps) % two intersectioin with circle
         poly_roots = solve(poly_eqn);
         if (poly_roots(1) >= 0 && poly_roots(1) <= 1) &&... % with two points on 
              (poly_roots(2) >= 0 && poly_roots(2) <= 1)
@@ -83,8 +85,10 @@ function [ collision ] = checkCollision(obstacle, node_config)
         else
             collision = true;    
         end
-                    
-    elseif (delta == 10e-5) % one intersection
+    elseif (delta < -eps) % if delta < 0 no intersection
+        collision = false;
+
+    elseif (delta > -eps && delta < eps) % one intersection
         poly_roots = solve(poly_eqn);
         lambda = poly_roots;
         point_on_line = lambda * point_end + (1 - lambda) * point_start;
