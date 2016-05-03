@@ -17,10 +17,10 @@ function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_i
     for i = 1:max_iter
         rnd_num = rand();
         if (rnd_num < 0.05)
-            % 5% chance to sample goal_config
+            % less than 5% chance to sample goal_config
             q_rand = goal_config;
         else
-            % 95% chance to get other collision free random sample
+            % more than 95% chance to get other collision free random sample
             q_rand = collisionFreeRandomConfig(map_info);
         end
         
@@ -44,7 +44,7 @@ function plotTree()
     wall_bottom = [45 45 55 55;0 45 45 0];
     % Plot the box.
     line(tissue(1,:),tissue(2,:),'color','blue');
-    line(wall_top(1,:),wall_top(2,:),'color','blue');
-    line(wall_bottom(1,:),wall_bottom(2,:),'color','blue');
+%     line(wall_top(1,:),wall_top(2,:),'color','blue');
+%     line(wall_bottom(1,:),wall_bottom(2,:),'color','blue');
     hold on;
 end

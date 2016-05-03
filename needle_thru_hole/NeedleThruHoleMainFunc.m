@@ -24,7 +24,7 @@ function [ output_args ] = NeedleThruHoleMainFunc()
                                     * structNeedleGeometry.radius * [1 0 0]';
     %% the number of attempts to expand the tree
 %     MAX_NODE = 5000;
-    MAX_ITER = 50;
+    MAX_ITER = 100;
     STEP_SIZE = 0.01;
     %% read in map info
     run('map_info_script');
