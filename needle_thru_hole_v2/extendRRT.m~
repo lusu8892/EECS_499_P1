@@ -50,8 +50,7 @@ function one_step_sz_collision = checkOneStepSzThru(map_info, q_new, q_near, res
     for i = 1:num_of_steps
         q_new_insertion(1,:) = q_new_insertion(1) + delta_x;
         q_new_insertion(2,:) = q_new_insertion(2) + delta_y;
-        q_new_insertion(3,:) = 0;
-        
+
         collision = collisionDetection( map_info, q_new_insertion);
         if (collision == true)
             return;
@@ -98,13 +97,16 @@ function [q_new, flag] = getNewNode(q_nearest, q_rand, step_size, distance)
         vec = q_rand - q_nearest;
         vec = vec / norm(vec);
         
-        q_new = q_nearest + vec * step_size
+        q_new = q_nearest + vec
+        
+        q_new.position(1,:) = q_nearest.position(1) + (q_rand.position(1) - q_nearest.position(1)) / distance * step_size;
+        q_new.position(2,:) = q_nearest.position(2) + (q_rand.position(2) - q_nearest.position(2)) / distance * step_size;
     end
 end
 
 %% subfunction insert
 function tree = insertNodeToTree( tree, q_parent, q_parent_index, q_new)
     tree.nodeIndex = [tree.nodeIndex; length(tree.nodeIndex) + 1];
-    tree.nodeConfig = [tree.nodeConfig q_new];
+    tree.nodeConfig = [tree.nodeConfig; q_new];
     tree.parentNodeIndex = [tree.parentNodeIndex; q_parent_index];
 end

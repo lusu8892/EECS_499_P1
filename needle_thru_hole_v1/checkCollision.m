@@ -15,8 +15,8 @@ function collision  = checkCollision(obstacle, node_config)
     radius = structNeedleGeometry.radius;
     
     % obstacle info expressed as line by defining starting and ending point
-    point_start = obstacle.start;
-    point_end = obstacle.end;
+    point_start = obstacle(:,1:3)';
+    point_end = obstacle(:,4:6)';
 
     % define a struture to store transformation matrix
     trans_mat = struct('rot', zeros(3), 'trans', zeros(3,1));

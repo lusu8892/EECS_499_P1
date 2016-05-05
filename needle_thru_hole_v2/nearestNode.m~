@@ -12,13 +12,13 @@ function [ q_near, q_near_index, normalized_dist_min] = nearestNode( tree, q_ran
     normalized_dist_vec = [];
     for i = 1:node_num
         % calculate dist btw q_rand and current selected existed onde on tree
-        normalized_dist = calNormalizedDist(q_rand, tree.nodeConfig(:,i));
+        normalized_dist = calNormalizedDist(q_rand, tree.nodeConfig(i));
         % store this dist in vector
         normalized_dist_vec = [normalized_dist_vec; normalized_dist];
     end
     
     [normalized_dist_min, index] = min(normalized_dist_vec);
-    q_near = tree.nodeConfig(:,index);
+    q_near = tree.nodeConfig(index);
     q_near_index = index;
 end
 
@@ -27,9 +27,8 @@ function normalized_dist = calNormalizedDist(q_rand, q_selected)
     x_rand = q_rand(1);
     y_rand = q_rand(2);
 
-    x_selected = q_selected(1);
-    y_selected = q_selected(2);
-    
+    x_selected = q_selected.position(1);
+    y_selected = q_selected.position(2);
     dist_square = ((x_rand - x_selected)^2 + (y_rand - y_selected)^2);
     normalized_dist = sqrt(dist_square);
 end
