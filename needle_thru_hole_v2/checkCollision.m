@@ -11,8 +11,8 @@
 %% checkCollision.m function starts below
 function collision  = checkCollision(obstacle, node_config)
     % needle structure
-    structNeedleGeometry = struct('straightL',0,'kinkAngle', 0, 'radius',10,'arc',pi);
-    radius = structNeedleGeometry.radius;
+%     structNeedleGeometry = struct('straightL',0,'kinkAngle', 0, 'radius',10,'arc',pi);
+    radius = 10;
     
     % obstacle info expressed as line by defining starting and ending point
     point_start = obstacle(:,1:3)';
@@ -71,7 +71,7 @@ function collision  = checkCollision(obstacle, node_config)
             end
             
         else
-            collision = true;    
+            collision = false;    
         end
     elseif (delta < -eps) % if delta < 0 no intersection
         collision = false;

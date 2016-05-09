@@ -1,9 +1,9 @@
 function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_info)
     
-    tree = struct('nodeIndex',[],'nodeConfig',[],'parentNodeIndex',[]);
-    tree.nodeIndex(1,:) = 1;
-    tree.nodeConfig(:,1) = initial_config;
-    tree.parentNodeIndex(1,:) = 1;
+%     tree = struct('nodeIndex',[],'nodeConfig',[],'parentNodeIndex',[]);
+    tree_node_index(1,:) = 1;
+    tree_node_config(:,1) = initial_config;
+    tree_parent_node_index(1,:) = 1;
     
     x_resolution = 1;
     y_resolution = 1;
@@ -24,12 +24,15 @@ function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_i
             q_rand = collisionFreeRandomConfig(map_info);
         end
         
-        tree = extendRRT(tree, q_rand, step_size, map_info, resolution);
-        num_of_nodes_on_tree = length(tree.nodeIndex);
+        [tree_node_index, tree_node_config, tree_parent_node_index]= ...
+            extendRRT(tree_node_index, tree_node_config,...
+                tree_parent_node_index, q_rand, step_size, map_info, resolution);
+            
+        num_of_nodes_on_tree = length(tree_node_index);
         
-        child_node_pose = tree.nodeConfig(:,num_of_nodes_on_tree);
-        parent_node_index = tree.parentNodeIndex(num_of_nodes_on_tree);
-        parent_node_pose = tree.nodeConfig(:,parent_node_index);
+        child_node_pose = tree_node_config(:,num_of_nodes_on_tree);
+        parent_node_index = tree_parent_node_index(num_of_nodes_on_tree);
+        parent_node_pose = tree_node_config(:,parent_node_index);
         
         plot(child_node_pose(1),child_node_pose(2),'.','LineWidth',0.4, 'color','black');
         
@@ -48,8 +51,8 @@ function plotTree()
     axis square;
     % Parameters
     tissue = [0  0  100 100 0; 0 100 100 0 0];
-    wall_top = [45 45 55 55;100 55 55 100];
-    wall_bottom = [45 45 55 55;0 45 45 0];
+    wall_top = [45 45 55 55;100 60 60 100];
+    wall_bottom = [45 45 55 55;0 40 40 0];
     % Plot the box.
     line(tissue(1,:),tissue(2,:),'color','blue');
     line(wall_top(1,:),wall_top(2,:),'color','blue');

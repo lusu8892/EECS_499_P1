@@ -11,7 +11,7 @@
 function [ collision ] = collisionDetection( map_info, sample_node )
     collision = true;
 %     collision_check_list = [];
-    for i = 1 : length(map_info)
+    for i = 1 : 10
         collision_check = checkCollision(map_info(i,:), sample_node);
         if (collision_check == true)
             return;

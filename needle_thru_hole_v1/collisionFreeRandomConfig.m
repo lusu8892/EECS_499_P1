@@ -11,20 +11,13 @@
 
 %% main function
 function [ sample_node ] = collisionFreeRandomConfig(map_info)
-    sample_node.position = [];
-    sample_node.direction = 0;
-
-    while (true)
-       
-        
+    
+    while (true)    
         % based on map info generate random sample configuration and check collision
-        sample_node.position(1,:) = 100 * rand();
-        sample_node.position(2,:) = 100 * rand();
-        sample_node.position(3,:) = 0;
-        sample_node.direction = (2 * pi) * rand();
-%         plot(sample_node.position(1,:),sample_node.position(2,:),'o');
-%         hold on
-%         pause(1);
+        sample_node(1,:) = 100 * rand();
+        sample_node(2,:) = 100 * rand();
+        sample_node(3,:) = 0;
+        sample_node(4,:) = (2 * pi) * rand();
         
         collision = collisionDetection(map_info, sample_node);
         

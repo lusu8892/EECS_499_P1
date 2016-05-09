@@ -1,43 +1,48 @@
 %% extendRRT.m
 % This is the function to extend the tree
 
-function tree = extendRRT( tree, q_rand, step_size, map_info, resolution)
+function [tree_node_index, tree_node_config, tree_parent_node_index] = ...
+            extendRRT( tree_node_index, tree_node_config, tree_parent_node_index, q_rand, step_size, map_info, resolution)
 
     % find the closest neighbor of q among all nodes on current Tree
-    [q_near, q_near_index, normalized_dist_min] = nearestNode(tree, q_rand);
+    [q_near, q_near_index, normalized_dist_min] = nearestNode(tree_node_index, tree_node_config, q_rand);
     
     % progress q_near by step_size along the straight line in Q btw q_near and q_rand
     [q_new, flag] = getNewNode(q_near, q_rand, step_size, normalized_dist_min);
     if (flag == 0) % this mean q_new is generated one step along q_near and q_rand
         collision = collisionDetection(map_info, q_new);
+%         collision = false;
         if (collision == true)
-            tree = tree;
+            tree_node_index = tree_node_index;
+            tree_node_config = tree_node_config;
+            tree_parent_node_index = tree_parent_node_index;
             return; % tree keeping same as input
         else
             ons_step_sz_collision = checkOneStepSzThru(map_info, q_new, q_near, resolution);
+%             ons_step_sz_collision = false;
             if (ons_step_sz_collision == true)
-                tree = tree;
+                tree_node_index = tree_node_index;
+                tree_node_config = tree_node_config;
+                tree_parent_node_index = tree_parent_node_index;
                 return; % tree keeping same as input
             else
-                tree = insertNodeToTree( tree, q_near, q_near_index, q_new);
+                [tree_node_index, tree_node_config, tree_parent_node_index] = ...
+                    insertNodeToTree( tree_node_index, tree_node_config, tree_parent_node_index, q_near_index, q_new);
             end
         end
     else % this mean q_new = q_rand
         ons_step_sz_collision = checkOneStepSzThru(map_info, q_new, q_near, resolution);
+%         ons_step_sz_collision = false;
         if (ons_step_sz_collision == true)
-            tree = tree;
+            tree_node_index = tree_node_index;
+            tree_node_config = tree_node_config;
+            tree_parent_node_index = tree_parent_node_index;
             return; % tree keeping same as input
         else
-            tree = insertNodeToTree( tree, q_near, q_near_index, q_new);
+            [tree_node_index, tree_node_config, tree_parent_node_index] = ...
+                   insertNodeToTree( tree_node_index, tree_node_config, tree_parent_node_index, q_near_index, q_new);
         end
     end
-%     
-%     if (isnan(q_new)) % if q_new == NaN then jump to another iteration
-%         tree = tree;
-%         return;
-%     else
-%         tree = insertNodeToTree( tree, q_near, q_new);
-%     end
 end
 
 %% subfunction to check one step size thru
@@ -98,13 +103,16 @@ function [q_new, flag] = getNewNode(q_nearest, q_rand, step_size, distance)
         vec = q_rand - q_nearest;
         vec = vec / norm(vec);
         
-        q_new = q_nearest + vec * step_size
+        q_new = q_nearest + vec * step_size;
     end
 end
 
 %% subfunction insert
-function tree = insertNodeToTree( tree, q_parent, q_parent_index, q_new)
-    tree.nodeIndex = [tree.nodeIndex; length(tree.nodeIndex) + 1];
-    tree.nodeConfig = [tree.nodeConfig q_new];
-    tree.parentNodeIndex = [tree.parentNodeIndex; q_parent_index];
+function [tree_node_index, tree_node_config, tree_parent_node_index] = ...
+            insertNodeToTree( tree_node_index, tree_node_config, tree_parent_node_index, q_parent_index, q_new)
+        
+    tree_node_index = [tree_node_index; length(tree_node_index) + 1];
+    tree_node_config = [tree_node_config q_new];
+    tree_parent_node_index = [tree_parent_node_index; q_parent_index];
+    
 end

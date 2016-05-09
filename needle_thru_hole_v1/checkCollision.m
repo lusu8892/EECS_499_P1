@@ -11,30 +11,20 @@
 %% checkCollision.m function starts below
 function collision  = checkCollision(obstacle, node_config)
     % needle structure
-    structNeedleGeometry = struct('straightL',0,'kinkAngle', 0, 'radius',10,'arc',pi);
-    radius = structNeedleGeometry.radius;
+    radius = 10;
     
     % obstacle info expressed as line by defining starting and ending point
     point_start = obstacle(:,1:3)';
     point_end = obstacle(:,4:6)';
 
-    % define a struture to store transformation matrix
-    trans_mat = struct('rot', zeros(3), 'trans', zeros(3,1));
+    point_center(:,1) = node_config;
+    theta = node_config(4);
     
-    x = node_config.position(1);
-    y = node_config.position(2);
-    z = node_config.position(3);
-    
-    theta = node_config.direction;
-    
-    trans_mat.rot = [cos(theta) -sin(theta) 0;sin(theta) cos(theta) 0;0 0 1];
-    trans_mat.trans = [x;y;z];
-    
-    point_center = trans_mat.trans;
+    trans_mat_rot= [cos(theta) -sin(theta) 0;sin(theta) cos(theta) 0;0 0 1];
 
     syms lambda real;
 
-    point_diff = lambda * point_end + (1 - lambda) * point_start - point_center;
+    point_diff = lambda * point_end + (1 - lambda) * point_start - point_center(1:3,1);
 
     poly_eqn =  expand(point_diff' * point_diff - radius^2); % define the polynomial eqn about variable lambda
     poly_eqn = collect(poly_eqn, lambda); % simplify it
@@ -56,8 +46,8 @@ function collision  = checkCollision(obstacle, node_config)
             point_on_line(:,1) = lambda(1) .* point_end + (1 - lambda(1)) .* point_start;
             point_on_line(:,2) = lambda(2) .* point_end + (1 - lambda(2)) .* point_start;
             
-            check_result(1) = checkAngle(point_on_line(:,1), point_center, trans_mat);
-            check_result(2) = checkAngle(point_on_line(:,2), point_center, trans_mat);
+            check_result(1) = checkAngle(point_on_line(:,1), point_center(1:3,1), trans_mat_rot);
+            check_result(2) = checkAngle(point_on_line(:,2), point_center(1:3,1), trans_mat_rot);
 
             if (check_result(1) >= 0 || check_result(2) >= 0)
                 collision = true; % intersected
@@ -75,7 +65,7 @@ function collision  = checkCollision(obstacle, node_config)
                 point_on_line = lambda * point_end + (1 - lambda) * point_start;
             end
 
-            check_result = checkAngle(point_on_line, point_center, trans_mat);
+            check_result = checkAngle(point_on_line, point_center(1:3,1), trans_mat_rot);
             if (check_result >= 0)
                 collision = true; % intersected
             else
@@ -83,7 +73,7 @@ function collision  = checkCollision(obstacle, node_config)
             end
             
         else
-            collision = true;    
+            collision = false;    
         end
     elseif (delta < -eps) % if delta < 0 no intersection
         collision = false;
@@ -93,7 +83,7 @@ function collision  = checkCollision(obstacle, node_config)
         lambda = poly_roots;
         point_on_line = lambda * point_end + (1 - lambda) * point_start;
         
-        check_result = checkAngle(point_on_line, point_center, trans_mat);
+        check_result = checkAngle(point_on_line, point_center(1:3,1), trans_mat_rot);
         if (check_result >= 0)
             collision = true; % intersected
         else
@@ -107,9 +97,9 @@ function collision  = checkCollision(obstacle, node_config)
 end
 
 %% subfunction 
-function [check_result] = checkAngle( point_1, point_2, trans_mat)
+function [check_result] = checkAngle( point_1, point_2, trans_mat_rot)
     vec = point_1 - point_2;
-    y_vec = trans_mat.rot * [0;1;0];
+    y_vec = trans_mat_rot * [0;1;0];
     
     check_result = dot(vec, y_vec);
 end
