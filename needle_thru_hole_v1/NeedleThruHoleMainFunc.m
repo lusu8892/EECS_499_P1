@@ -29,7 +29,7 @@ function [ output_args ] = NeedleThruHoleMainFunc()
     %% read in map info
     run('map_info_script');
     %% execute RRT
-    [ tree ] = RRT( initial, goal, MAX_ITER, STEP_SIZE, map_info);
+    [tree_node_index, tree_node_config, tree_parent_node_index] = RRT( initial, goal, MAX_ITER, STEP_SIZE, map_info);
     
 end
 

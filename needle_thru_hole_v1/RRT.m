@@ -1,9 +1,10 @@
-function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_info)
+function [ tree_node_index, tree_node_config, tree_parent_node_index ] = RRT( initial_config, goal_config, max_iter, step_size, map_info)
     
     % tree = struct('nodeIndex',[],'nodeConfig',[],'parentNodeIndex',[]);
     tree_node_index(1,:) = 1;
     tree_node_config(:,1) = initial_config;
     tree_parent_node_index(1,:) = 1;
+    tree_cost(1,:) = 0;
 
     x_resolution = 0.3;
     y_resolution = 0.3;
@@ -41,6 +42,9 @@ function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_i
         line(edge(1,:), edge(2,:), edge(4,:), 'color','red');
         
         pause(.01);
+        if (tree_node_config(:,num_of_nodes_on_tree) == goal_config )
+            return
+        end
      end
 end
 

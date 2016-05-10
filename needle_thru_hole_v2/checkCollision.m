@@ -97,7 +97,7 @@ end
 %% subfunction 
 function [check_result] = checkAngle( point_1, point_2)
     vec = point_1 - point_2;
-    y_vec = [0;1;0];
+    y_vec = [1;0;0];
     
     check_result = dot(vec, y_vec);
 end

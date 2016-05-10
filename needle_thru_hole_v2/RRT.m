@@ -1,4 +1,4 @@
-function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_info)
+function [tree_node_index, tree_node_config, tree_parent_node_index] = RRT( initial_config, goal_config, max_iter, step_size, map_info)
     
 %     tree = struct('nodeIndex',[],'nodeConfig',[],'parentNodeIndex',[]);
     tree_node_index(1,:) = 1;
@@ -24,10 +24,11 @@ function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_i
             q_rand = collisionFreeRandomConfig(map_info);
         end
         
+        % extend tree
         [tree_node_index, tree_node_config, tree_parent_node_index]= ...
             extendRRT(tree_node_index, tree_node_config,...
                 tree_parent_node_index, q_rand, step_size, map_info, resolution);
-            
+           
         num_of_nodes_on_tree = length(tree_node_index);
         
         child_node_pose = tree_node_config(:,num_of_nodes_on_tree);
@@ -41,6 +42,9 @@ function [ tree ] = RRT( initial_config, goal_config, max_iter, step_size, map_i
         line(A(1,:), A(2,:), 'color','red');
         
         pause(.01);
+        if (tree_node_config(:,num_of_nodes_on_tree) == goal_config )
+            return
+        end
      end
 end
 

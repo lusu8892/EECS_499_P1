@@ -61,7 +61,7 @@ map_info = [map_info; downWallRight];
 map_info = [map_info; downWallLeft];
 map_info = [map_info; downWallBottom];
 %% testing starts
-sample_node = [30;45;0];
-h = circleDrawing(sample_node(1),sample_node(2),structNeedleGeometry.radius,0,pi)
+sample_node = [50;42;0];
+h = circleDrawing(sample_node(1),sample_node(2),structNeedleGeometry.radius,-pi/2 ,pi/2)
 collision_check = checkCollision(map_info(10,:), sample_node);
 
