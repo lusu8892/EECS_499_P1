@@ -6,9 +6,9 @@ function [ tree_node_index, tree_node_config, tree_parent_node_index ] = RRT( in
     tree_parent_node_index(1,:) = 1;
     tree_cost(1,:) = 0;
 
-    x_resolution = 0.3;
-    y_resolution = 0.3;
-    theta_resolution = 0.1 * pi;
+    x_resolution = 1;
+    y_resolution = 1;
+    theta_resolution = 0.05 * pi;
     resolution = [x_resolution y_resolution theta_resolution];
     
     plotTree();
