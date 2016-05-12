@@ -11,9 +11,8 @@ function [ tree_node_index, tree_node_config, tree_parent_node_index ] = RRT( in
     theta_resolution = 0.05 * pi;
     resolution = [x_resolution y_resolution theta_resolution];
     
-    plotTree();
+    plotMap();
     scatter3(initial_config(1), initial_config(2), initial_config(4),'.','LineWidth',0.4, 'MarkerEdgeColor','black');
-%     s = rng;
     
     for i = 1:max_iter
         rnd_num = rand();
@@ -49,7 +48,7 @@ function [ tree_node_index, tree_node_config, tree_parent_node_index ] = RRT( in
 end
 
 %% subfunction plot nodes
-function plotTree()
+function plotMap()
     clf;
     axis([0 100 0 100]);
     axis square;
