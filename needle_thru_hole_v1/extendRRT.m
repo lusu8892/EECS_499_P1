@@ -1,5 +1,16 @@
 %% extendRRT.m
 % This is the function to extend the tree
+% Input: 1. pre-modified tree_node_index
+%        2. pre-modified tree_node_config
+%        3. pre-modified tree_parent_index
+%        4. random sample node in Qfree
+%        5. pre-defined step_size
+%        6. resolution array
+% 
+% Output: 1. modified tree_node_index
+%         2. modified tree_node_config
+%         3. modified tree_parent_index
+
 
 function [tree_node_index, tree_node_config, tree_parent_node_index] = ...
             extendRRT( tree_node_index, tree_node_config, tree_parent_node_index, q_rand, step_size, map_info, resolution)

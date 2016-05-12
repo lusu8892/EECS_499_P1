@@ -29,9 +29,8 @@ function collision  = checkCollision(obstacle, node_config)
     delta = b^2 - 4 * a * c; % discrminant of polynomial eqn
     point_on_line = [];
     if (delta > eps) % two intersectioin with circle
-        x1 = (-b + sqrt(delta)) / (2 * a);
-        x2 = (-b - sqrt(delta)) / (2 * a);
-        poly_roots = [x1 x2]';
+        x1 = (-b + sqrt(delta)) / (2 * a)
+        poly_roots = []
         if (poly_roots(1) >= 0 && poly_roots(1) <= 1) &&... % with two points on 
              (poly_roots(2) >= 0 && poly_roots(2) <= 1)
             lambda = poly_roots;
@@ -71,7 +70,7 @@ function collision  = checkCollision(obstacle, node_config)
         collision = false;
 
     elseif (delta > -eps && delta < eps) % one intersection
-        poly_roots = -b / (2 * a);
+        poly_roots = solve(poly_eqn);
         lambda = poly_roots;
         point_on_line = lambda * point_end + (1 - lambda) * point_start;
         
