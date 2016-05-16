@@ -42,6 +42,8 @@ function [ tree_node_index, tree_node_config, tree_parent_node_index ] = RRT( in
         
         pause(.01);
         if (tree_node_config(:,num_of_nodes_on_tree) == goal_config )
+            hold off;
+            plotMap();
             return
         end
      end

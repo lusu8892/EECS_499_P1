@@ -31,5 +31,7 @@ function [ output_args ] = NeedleThruHoleMainFunc()
     %% execute RRT
     [tree_node_index, tree_node_config, tree_parent_node_index] = RRT( initial, goal, MAX_ITER, STEP_SIZE, map_info);
     [path_node_config, path_node_index] = findPath( tree_node_index, tree_node_config, tree_parent_node_index );
+    
+    showNeedleMotion( path_node_config, path_node_index, structNeedleGeometry.radius);
 end
 
